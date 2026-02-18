@@ -130,3 +130,67 @@ document.querySelectorAll('.pipeline-step').forEach((step, index) => {
     
     step.style.cursor = 'pointer';
 });
+
+// Dynamically detect repository URL
+function detectRepository() {
+    // Get repository info from GitHub Pages environment or current URL
+    const hostname = window.location.hostname;
+    const pathname = window.location.pathname;
+    
+    // GitHub Pages format: username.github.io/repo-name
+    if (hostname.includes('github.io')) {
+        const parts = hostname.split('.');
+        if (parts.length >= 2) {
+            const username = parts[0];
+            // Extract repo name from pathname (remove leading/trailing slashes)
+            // If pathname is just "/", use the default repo name
+            const pathParts = pathname.split('/').filter(p => p);
+            const repoName = pathParts.length > 0 ? pathParts[0] : 'TEMP-CI-CD';
+            
+            const repoUrl = `https://github.com/${username}/${repoName}`;
+            const actionsUrl = `${repoUrl}/actions`;
+            
+            // Update all repository links
+            const repoLink = document.getElementById('repo-link');
+            const workflowLink = document.getElementById('workflow-link');
+            const footerRepoLink = document.getElementById('footer-repo-link');
+            
+            if (repoLink) {
+                repoLink.href = repoUrl;
+                repoLink.textContent = repoUrl.replace('https://github.com/', '');
+            }
+            
+            if (workflowLink) {
+                workflowLink.href = actionsUrl;
+            }
+            
+            if (footerRepoLink) {
+                footerRepoLink.href = repoUrl;
+                footerRepoLink.textContent = 'View on GitHub';
+            }
+        }
+    } else {
+        // Fallback: try to detect from meta tags or use placeholder
+        const repoLink = document.getElementById('repo-link');
+        const workflowLink = document.getElementById('workflow-link');
+        const footerRepoLink = document.getElementById('footer-repo-link');
+        
+        if (repoLink) {
+            repoLink.href = '#';
+            repoLink.textContent = 'Your Repository';
+        }
+        
+        if (workflowLink) {
+            workflowLink.href = '#';
+            workflowLink.textContent = 'View Workflow Runs →';
+        }
+        
+        if (footerRepoLink) {
+            footerRepoLink.href = 'https://github.com/njvanas/TEMP-CI-CD';
+            footerRepoLink.textContent = 'View on GitHub';
+        }
+    }
+}
+
+// Run on page load
+detectRepository();
