@@ -14,6 +14,7 @@
                 <h1 class="logo">My Website</h1>
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
+                    <li><a href="#cicd">CI/CD</a></li>
                     <li><a href="#about">About</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
@@ -26,8 +27,102 @@
             <div class="container">
                 <h2>Welcome to GitHub Pages</h2>
                 <p>This website is automatically deployed using GitHub Actions CI/CD</p>
+                <p style="font-size: 1rem; margin-top: 1rem; opacity: 0.8;">Scroll down to see the CI/CD pipeline in action!</p>
                 <button class="cta-button" onclick="showMessage()">Click Me!</button>
                 <p id="message" class="hidden"></p>
+            </div>
+        </section>
+
+        <section id="cicd" class="cicd-section">
+            <div class="container">
+                <h2>CI/CD Pipeline Visualization</h2>
+                <p class="section-subtitle">Watch how your code flows from commit to deployment</p>
+                
+                <div class="pipeline-container">
+                    <div class="pipeline-step" data-step="1">
+                        <div class="step-icon">📝</div>
+                        <div class="step-content">
+                            <h3>1. Code Commit</h3>
+                            <p>Developer pushes code to GitHub</p>
+                            <div class="step-status active">
+                                <span class="status-dot"></span>
+                                <span>Triggered</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pipeline-arrow">→</div>
+                    
+                    <div class="pipeline-step" data-step="2">
+                        <div class="step-icon">🔍</div>
+                        <div class="step-content">
+                            <h3>2. GitHub Actions</h3>
+                            <p>Workflow automatically starts</p>
+                            <div class="step-status active">
+                                <span class="status-dot"></span>
+                                <span>Running</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pipeline-arrow">→</div>
+                    
+                    <div class="pipeline-step" data-step="3">
+                        <div class="step-icon">🔨</div>
+                        <div class="step-content">
+                            <h3>3. Build & Test</h3>
+                            <p>Code is validated and prepared</p>
+                            <div class="step-status active">
+                                <span class="status-dot"></span>
+                                <span>Processing</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pipeline-arrow">→</div>
+                    
+                    <div class="pipeline-step" data-step="4">
+                        <div class="step-icon">🚀</div>
+                        <div class="step-content">
+                            <h3>4. Deploy</h3>
+                            <p>Site goes live on GitHub Pages</p>
+                            <div class="step-status success">
+                                <span class="status-dot"></span>
+                                <span>Deployed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="deployment-info">
+                    <div class="info-card">
+                        <div class="info-icon">⏱️</div>
+                        <div class="info-content">
+                            <h4>Deployment Time</h4>
+                            <p id="deploy-time">~2 minutes</p>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">🔄</div>
+                        <div class="info-content">
+                            <h4>Auto-Deploy</h4>
+                            <p>On every push to main</p>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">✅</div>
+                        <div class="info-content">
+                            <h4>Status</h4>
+                            <p id="deploy-status">Live & Running</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="workflow-link">
+                    <a href="https://github.com/njvanas/TEMP-CI-CD/actions" target="_blank" class="workflow-button">
+                        View Workflow Runs →
+                    </a>
+                </div>
             </div>
         </section>
 
