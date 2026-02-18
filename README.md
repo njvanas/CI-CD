@@ -47,16 +47,21 @@ git push -u origin main
 
 ### 3. Enable GitHub Pages
 
-1. Go to your repository on GitHub
-2. Click **Settings** → **Pages**
+**IMPORTANT**: You must enable GitHub Pages BEFORE the workflow runs:
+
+1. Go to your repository on GitHub: `https://github.com/njvanas/TEMP-CI-CD`
+2. Click **Settings** → **Pages** (in the left sidebar)
 3. Under "Source", select **GitHub Actions**
-4. The workflow will automatically run and deploy your site
+4. Click **Save**
+5. The workflow will automatically run and deploy your site
+
+**If you see an error**: "Get Pages site failed" or "Not Found", it means Pages hasn't been enabled yet. Follow steps 1-4 above first, then re-run the workflow.
 
 ### 4. Access Your Website
 
 After the workflow completes (usually takes 1-2 minutes), your site will be available at:
 ```
-https://njvanas.github.io/YOUR_REPO_NAME/
+https://njvanas.github.io/TEMP-CI-CD/
 ```
 
 ## 🔄 How CI/CD Works
