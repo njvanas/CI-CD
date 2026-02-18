@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A modern website deployed via GitHub Pages with CI/CD">
+    <title>GitHub Pages CI/CD Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <h1 class="logo">My Website</h1>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="container">
+                <h2>Welcome to GitHub Pages</h2>
+                <p>This website is automatically deployed using GitHub Actions CI/CD</p>
+                <button class="cta-button" onclick="showMessage()">Click Me!</button>
+                <p id="message" class="hidden"></p>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <div class="container">
+                <h2>About</h2>
+                <p>This is a demonstration website showcasing automated deployment to GitHub Pages using GitHub Actions.</p>
+                <p>Every time you push changes to the main branch, GitHub Actions will automatically build and deploy your site.</p>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2>Contact</h2>
+                <p>Repository: <a href="https://github.com/njvanas" target="_blank">github.com/njvanas</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 My Website. Deployed with GitHub Pages & CI/CD</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
