@@ -121,14 +121,131 @@ function simulatePipelineStatus() {
 // Run simulation on load
 setTimeout(simulatePipelineStatus, 2000);
 
+// Step information for modal popups
+const stepInfo = {
+    1: {
+        icon: '📝',
+        title: '1. Code Commit',
+        description: 'This is where your CI/CD journey begins! When you push code to your GitHub repository, it triggers the entire deployment pipeline.',
+        details: [
+            'Developer writes code locally',
+            'Code is committed to Git',
+            'Changes are pushed to GitHub repository',
+            'GitHub detects the push event'
+        ],
+        result: 'The push event triggers GitHub Actions workflow automatically'
+    },
+    2: {
+        icon: '🔍',
+        title: '2. GitHub Actions',
+        description: 'GitHub Actions is the automation engine that runs your CI/CD workflow. It detects the push and starts the deployment process.',
+        details: [
+            'GitHub Actions detects the push event',
+            'Workflow file (.github/workflows/deploy.yml) is read',
+            'Virtual machine (runner) is provisioned',
+            'Workflow steps begin execution'
+        ],
+        result: 'Workflow is now running and ready to process your code'
+    },
+    3: {
+        icon: '🔨',
+        title: '3. Build & Test',
+        description: 'Your code is validated, tested, and prepared for deployment. This ensures everything works correctly before going live.',
+        details: [
+            'Code is checked out from repository',
+            'Dependencies are installed (if any)',
+            'Code is validated and tested',
+            'Artifacts are prepared for deployment'
+        ],
+        result: 'Code is validated and ready to be deployed to GitHub Pages'
+    },
+    4: {
+        icon: '🚀',
+        title: '4. Deploy',
+        description: 'The final step! Your website is deployed to GitHub Pages and becomes live on the internet for everyone to see.',
+        details: [
+            'Prepared artifacts are uploaded',
+            'GitHub Pages is configured',
+            'Website files are deployed to CDN',
+            'DNS and routing are updated'
+        ],
+        result: 'Your website is now live and accessible to the world!'
+    }
+};
+
+// Modal functionality
+const modal = document.getElementById('step-modal');
+const modalTitle = document.getElementById('modal-title');
+const modalIcon = document.getElementById('modal-icon');
+const modalDescription = document.getElementById('modal-description');
+const modalDetailsList = document.getElementById('modal-details-list');
+const modalResult = document.getElementById('modal-result');
+const modalClose = document.querySelector('.modal-close');
+
+function showModal(stepNumber) {
+    const info = stepInfo[stepNumber];
+    if (!info) return;
+    
+    modalIcon.textContent = info.icon;
+    modalTitle.textContent = info.title;
+    modalDescription.textContent = info.description;
+    modalResult.textContent = info.result;
+    
+    // Clear and populate details list
+    modalDetailsList.innerHTML = '';
+    info.details.forEach(detail => {
+        const li = document.createElement('li');
+        li.textContent = detail;
+        modalDetailsList.appendChild(li);
+    });
+    
+    // Show modal with animation
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function hideModal() {
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // Restore scrolling
+}
+
+// Close modal when clicking X
+if (modalClose) {
+    modalClose.addEventListener('click', hideModal);
+}
+
+// Close modal when clicking outside
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        hideModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('show')) {
+        hideModal();
+    }
+});
+
 // Add click interaction to pipeline steps
-document.querySelectorAll('.pipeline-step').forEach((step, index) => {
+document.querySelectorAll('.pipeline-step').forEach((step) => {
+    const stepNumber = parseInt(step.getAttribute('data-step'));
+    
     step.addEventListener('click', () => {
-        const stepNames = ['Code Commit', 'GitHub Actions', 'Build & Test', 'Deploy'];
-        alert(`Step ${index + 1}: ${stepNames[index]}\n\nThis step is part of the automated CI/CD pipeline that runs whenever code is pushed to the repository.`);
+        showModal(stepNumber);
     });
     
     step.style.cursor = 'pointer';
+    
+    // Add hover effect
+    step.addEventListener('mouseenter', () => {
+        step.style.transform = 'translateY(-8px) scale(1.02)';
+    });
+    
+    step.addEventListener('mouseleave', () => {
+        step.style.transform = 'translateY(-5px) scale(1)';
+    });
 });
 
 // Dynamically detect repository URL
