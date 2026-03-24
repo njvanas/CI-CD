@@ -258,7 +258,6 @@ function defaultRepoUrl() {
 
 // Set GitHub and Actions URLs from Pages URL when possible; always point to the repo, not the live site
 function detectRepository() {
-    const repoLink = document.getElementById('repo-link');
     const workflowLink = document.getElementById('workflow-link');
     const footerRepoLink = document.getElementById('footer-repo-link');
 
@@ -277,12 +276,7 @@ function detectRepository() {
     }
 
     const actionsUrl = `${repoUrl}/actions`;
-    const label = repoUrl.replace('https://github.com/', '');
 
-    if (repoLink) {
-        repoLink.href = repoUrl;
-        repoLink.textContent = label;
-    }
     if (workflowLink) {
         workflowLink.href = actionsUrl;
     }
