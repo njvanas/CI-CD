@@ -67,8 +67,8 @@ function animatePipeline() {
                 
                 // Add completion effect
                 if (index === steps.length - 1) {
-                    step.style.borderColor = '#28a745';
-                    step.style.boxShadow = '0 0 20px rgba(40,167,69,0.3)';
+                    step.style.borderColor = '#22c55e';
+                    step.style.boxShadow = '0 0 20px rgba(34, 197, 94, 0.25)';
                 }
             }, 100);
         }, delay);
@@ -248,64 +248,46 @@ document.querySelectorAll('.pipeline-step').forEach((step) => {
     });
 });
 
-// Dynamically detect repository URL
+/** Canonical repo for this demo (matches origin when forked). */
+const DEFAULT_REPO = { owner: 'njvanas', name: 'CI-CD' };
+
+function defaultRepoUrl() {
+    const { owner, name } = DEFAULT_REPO;
+    return `https://github.com/${owner}/${name}`;
+}
+
+// Set GitHub and Actions URLs from Pages URL when possible; always point to the repo, not the live site
 function detectRepository() {
-    // Get repository info from GitHub Pages environment or current URL
+    const repoLink = document.getElementById('repo-link');
+    const workflowLink = document.getElementById('workflow-link');
+    const footerRepoLink = document.getElementById('footer-repo-link');
+
+    let repoUrl = defaultRepoUrl();
     const hostname = window.location.hostname;
     const pathname = window.location.pathname;
-    
-    // GitHub Pages format: username.github.io/repo-name
+
     if (hostname.includes('github.io')) {
         const parts = hostname.split('.');
         if (parts.length >= 2) {
             const username = parts[0];
-            // Extract repo name from pathname (remove leading/trailing slashes)
-            // If pathname is just "/", use the default repo name
-            const pathParts = pathname.split('/').filter(p => p);
-            const repoName = pathParts.length > 0 ? pathParts[0] : 'TEMP-CI-CD';
-            
-            const repoUrl = `https://github.com/${username}/${repoName}`;
-            const actionsUrl = `${repoUrl}/actions`;
-            
-            // Update all repository links
-            const repoLink = document.getElementById('repo-link');
-            const workflowLink = document.getElementById('workflow-link');
-            const footerRepoLink = document.getElementById('footer-repo-link');
-            
-            if (repoLink) {
-                repoLink.href = repoUrl;
-                repoLink.textContent = repoUrl.replace('https://github.com/', '');
-            }
-            
-            if (workflowLink) {
-                workflowLink.href = actionsUrl;
-            }
-            
-            if (footerRepoLink) {
-                footerRepoLink.href = repoUrl;
-                footerRepoLink.textContent = 'View on GitHub';
-            }
+            const pathParts = pathname.split('/').filter(Boolean);
+            const repoName = pathParts.length > 0 ? pathParts[0] : DEFAULT_REPO.name;
+            repoUrl = `https://github.com/${username}/${repoName}`;
         }
-    } else {
-        // Fallback: try to detect from meta tags or use placeholder
-        const repoLink = document.getElementById('repo-link');
-        const workflowLink = document.getElementById('workflow-link');
-        const footerRepoLink = document.getElementById('footer-repo-link');
-        
-        if (repoLink) {
-            repoLink.href = '#';
-            repoLink.textContent = 'Your Repository';
-        }
-        
-        if (workflowLink) {
-            workflowLink.href = '#';
-            workflowLink.textContent = 'View Workflow Runs →';
-        }
-        
-        if (footerRepoLink) {
-            footerRepoLink.href = 'https://github.com/njvanas/TEMP-CI-CD';
-            footerRepoLink.textContent = 'View on GitHub';
-        }
+    }
+
+    const actionsUrl = `${repoUrl}/actions`;
+    const label = repoUrl.replace('https://github.com/', '');
+
+    if (repoLink) {
+        repoLink.href = repoUrl;
+        repoLink.textContent = label;
+    }
+    if (workflowLink) {
+        workflowLink.href = actionsUrl;
+    }
+    if (footerRepoLink) {
+        footerRepoLink.href = repoUrl;
     }
 }
 
