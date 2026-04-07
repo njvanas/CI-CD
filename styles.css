@@ -780,8 +780,10 @@ main {
     align-items: center;
     justify-content: center;
     padding: 0.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
     background: var(--slate-800);
-    color: var(--text-gray-400);
+    color: #cbd5e1;
     border-radius: 0.5rem;
     transition: background 0.3s ease, color 0.3s ease;
 }
@@ -791,9 +793,25 @@ main {
     color: #fff;
 }
 
+/* Inline SVGs: explicit paint so icons always show (stroke vs fill) */
 .site-footer__icon {
+    width: 1.25rem;
+    height: 1.25rem;
     display: block;
     flex-shrink: 0;
+    overflow: visible;
+}
+
+.site-footer__icon--mail .site-footer__icon-stroke {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.site-footer__icon--glyph path {
+    fill: currentColor;
 }
 
 .site-footer__heading {
