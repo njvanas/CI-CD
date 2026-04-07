@@ -5,17 +5,25 @@
 }
 
 :root {
+    /* Aligned with njvanas.github.io (Tailwind slate / blue scale) */
     --bg-deep: #0a0e27;
     --bg-elevated: rgba(30, 41, 59, 0.5);
     --bg-card: rgba(15, 23, 42, 0.5);
-    --bg-header: rgba(15, 23, 42, 0.95);
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
     --text-primary: #e2e8f0;
+    --text-gray-300: #d1d5db;
+    --text-gray-400: #9ca3af;
     --text-muted: #94a3b8;
     --text-subtle: #64748b;
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-ring: #3b82f6;
+    --blue-300: #93c5fd;
+    --blue-400: #60a5fa;
     --border: rgba(51, 65, 85, 0.5);
     --border-strong: #334155;
+    --border-footer: #1e293b;
     --success: #22c55e;
     --success-bg: rgba(22, 163, 74, 0.15);
     --warning: #fbbf24;
@@ -61,22 +69,38 @@ main {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1.25rem;
+    padding: 0 1.5rem;
 }
 
-/* Header & Navigation — sticky bar aligned with portfolio project pages */
-header {
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-    position: sticky;
+.scroll-target {
+    scroll-margin-top: 6rem;
+}
+
+/* Header — fixed + transparent until scroll (matches portfolio Header.tsx) */
+.site-header {
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        backdrop-filter 0.3s ease;
 }
 
-nav {
+.site-header--scrolled {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-bottom-color: rgba(30, 41, 59, 0.6);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.site-header__nav {
     padding: 1rem 0;
 }
 
@@ -88,71 +112,76 @@ nav {
     gap: 1rem;
 }
 
-.logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.25rem;
+.site-brand {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #60a5fa;
+    color: #fff;
     text-decoration: none;
     letter-spacing: -0.02em;
-    transition: color 0.2s ease;
+    transition: opacity 0.2s ease;
 }
 
-.logo:hover {
-    color: #93c5fd;
-}
-
-.logo-mark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.5rem;
-    background: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 800;
-    flex-shrink: 0;
-}
-
-.logo-text {
-    color: #e2e8f0;
-    font-weight: 700;
-}
-
-.logo:hover .logo-text {
-    color: #fff;
+.site-brand:hover {
+    opacity: 0.9;
 }
 
 .nav-links {
     display: flex;
     list-style: none;
-    gap: 1.5rem;
+    gap: 2rem;
     flex-wrap: wrap;
 }
 
 .nav-links a {
     text-decoration: none;
-    color: var(--text-muted);
+    color: var(--text-gray-300);
     font-weight: 500;
     font-size: 0.95rem;
     transition: color 0.2s ease;
 }
 
 .nav-links a:hover {
-    color: #60a5fa;
+    color: #fff;
 }
 
-/* Hero Section — aligned with njvanas.github.io project pages (slate / blue gradient) */
+/* Hero — layered background like portfolio Hero.tsx */
 .hero {
-    background: linear-gradient(to bottom right, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
-    color: var(--text-primary);
-    padding: 4.5rem 0 5rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
-    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 7rem 0 5rem;
+}
+
+.hero__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.hero__bg-wash {
+    position: absolute;
+    inset: 0;
+    opacity: 0.1;
+    background: linear-gradient(to right, rgba(37, 99, 235, 0.2), rgba(147, 51, 234, 0.2));
+}
+
+.hero__bg-radials {
+    position: absolute;
+    inset: 0;
+    opacity: 1;
+    background-image:
+        radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(147, 51, 234, 0.1) 0%, transparent 50%);
+}
+
+.hero__inner {
+    position: relative;
+    z-index: 1;
 }
 
 .hero-eyebrow {
@@ -160,35 +189,60 @@ nav {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: #93c5fd;
+    color: var(--blue-300);
     margin-bottom: 1rem;
 }
 
-.hero h2 {
-    font-size: clamp(2rem, 5vw, 3rem);
+.hero__title {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
     font-weight: 700;
+    color: #fff;
     margin-bottom: 1rem;
     letter-spacing: -0.03em;
-    line-height: 1.15;
+    line-height: 1.1;
 }
 
-.hero p {
-    font-size: 1.1rem;
+.hero__subtitle {
+    font-size: clamp(1.25rem, 2.5vw, 1.875rem);
+    font-weight: 300;
+    color: var(--blue-300);
+    margin-bottom: 1.5rem;
+    line-height: 1.35;
+}
+
+.hero__lead {
+    font-size: 1.25rem;
     margin-bottom: 1rem;
-    color: #cbd5e1;
+    color: var(--text-gray-300);
     max-width: 42rem;
     margin-left: auto;
     margin-right: auto;
+    line-height: 1.625;
 }
 
 .hero-sub {
     font-size: 0.95rem !important;
-    color: var(--text-muted) !important;
+    color: var(--text-gray-400) !important;
     margin-bottom: 1.75rem !important;
 }
 
+.hero__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (min-width: 40rem) {
+    .hero__actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+
 .inline-link {
-    color: #93c5fd;
+    color: var(--blue-300);
     text-decoration: none;
     border-bottom: 1px solid rgba(147, 197, 253, 0.35);
     transition: color 0.2s ease, border-color 0.2s ease;
@@ -199,27 +253,52 @@ nav {
     border-bottom-color: rgba(255, 255, 255, 0.5);
 }
 
-.cta-button {
+/* Buttons — portfolio primary / outline CTAs */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+        background 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.2s ease;
+}
+
+.btn--primary {
     background: var(--accent);
     color: #fff;
     border: none;
-    padding: 0.85rem 1.75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    font-family: inherit;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
-.cta-button:hover {
+.btn--primary:hover {
     background: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
 }
 
-.cta-button:active {
+.btn--primary:active {
     transform: translateY(0);
+}
+
+.btn--outline {
+    background: transparent;
+    color: var(--blue-400);
+    border: 2px solid var(--blue-400);
+}
+
+.btn--outline:hover {
+    background: var(--blue-400);
+    color: #fff;
 }
 
 #message {
@@ -237,26 +316,40 @@ nav {
     display: none;
 }
 
-/* CI/CD Section */
-.cicd-section {
-    padding: 4.5rem 0;
-    background: var(--bg-deep);
+/* Section titles — portfolio About / section pattern */
+.section-head {
+    text-align: center;
+    margin-bottom: 4rem;
 }
 
-.cicd-section h2 {
-    font-size: clamp(1.75rem, 4vw, 2.25rem);
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-    text-align: center;
+.section-head__title {
+    font-size: clamp(2.25rem, 4vw, 3rem);
     font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
     letter-spacing: -0.02em;
 }
 
-.section-subtitle {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 1.05rem;
-    margin-bottom: 3rem;
+.section-head__rule {
+    width: 6rem;
+    height: 0.25rem;
+    background: var(--accent-ring);
+    margin: 0 auto 2rem;
+    border-radius: 9999px;
+}
+
+.section-head__lead {
+    font-size: 1.25rem;
+    color: var(--text-gray-300);
+    max-width: 42rem;
+    margin: 0 auto;
+    line-height: 1.625;
+}
+
+/* CI/CD Section */
+.cicd-section {
+    padding: 5rem 0;
+    background: var(--bg-deep);
 }
 
 .pipeline-container {
@@ -432,22 +525,9 @@ nav {
     margin-top: 2rem;
 }
 
-.workflow-button {
-    display: inline-block;
-    padding: 0.85rem 1.75rem;
-    background: var(--accent);
-    color: #fff;
-    text-decoration: none;
-    border-radius: 0.5rem;
-    font-weight: 600;
+.workflow-button.workflow-button {
     font-size: 0.95rem;
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.workflow-button:hover {
-    background: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.45);
+    padding: 0.85rem 1.75rem;
 }
 
 /* Modal Styles */
@@ -565,7 +645,7 @@ nav {
 
 .modal-details h3 {
     font-size: 1.05rem;
-    color: #93c5fd;
+    color: var(--blue-300);
     margin-bottom: 0.75rem;
     font-weight: 600;
 }
@@ -588,7 +668,7 @@ nav {
     content: "✓";
     position: absolute;
     left: 0;
-    color: var(--accent);
+    color: var(--accent-ring);
     font-weight: bold;
     font-size: 1rem;
 }
@@ -616,42 +696,44 @@ nav {
     font-size: 0.95rem;
 }
 
-/* About Section */
+/* About Section — bg-slate-800/50 like portfolio About */
 .about {
-    padding: 4rem 0;
-    background: rgba(15, 23, 42, 0.35);
+    padding: 5rem 0;
+    background: rgba(30, 41, 59, 0.5);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
 }
 
-.about h2 {
-    font-size: clamp(1.75rem, 4vw, 2.25rem);
-    margin-bottom: 1.25rem;
-    color: var(--text-primary);
-    font-weight: 700;
+.about__body {
+    max-width: 56rem;
+    margin: 0 auto;
 }
 
-.about p {
+.about__body p {
     font-size: 1.05rem;
     margin-bottom: 1rem;
-    color: var(--text-muted);
-    max-width: 48rem;
+    color: var(--text-gray-300);
+    line-height: 1.625;
 }
 
-/* Footer — same structure as Office-Auto-Install / portfolio subpages */
+.about__body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Footer — matches portfolio Footer.tsx (slate-900 / slate-800 borders) */
 .site-footer {
     width: 100%;
     margin-top: auto;
-    background: #0f172a;
-    border-top: 1px solid #1e293b;
-    color: #94a3b8;
+    background: var(--slate-900);
+    border-top: 1px solid var(--border-footer);
+    color: var(--text-gray-400);
     font-size: 0.9375rem;
 }
 
 .site-footer__inner {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 3rem 1.5rem 1.5rem;
+    padding: 3rem 1.5rem 2rem;
 }
 
 .site-footer__grid {
@@ -676,7 +758,7 @@ nav {
 
 .site-footer__tagline {
     margin: 0 0 1rem;
-    color: #9ca3af;
+    color: var(--text-gray-400);
     line-height: 1.625;
 }
 
@@ -698,14 +780,14 @@ nav {
     align-items: center;
     justify-content: center;
     padding: 0.5rem;
-    background: #1e293b;
-    color: #9ca3af;
+    background: var(--slate-800);
+    color: var(--text-gray-400);
     border-radius: 0.5rem;
     transition: background 0.3s ease, color 0.3s ease;
 }
 
 .site-footer__social-btn:hover {
-    background: #2563eb;
+    background: var(--accent);
     color: #fff;
 }
 
@@ -736,7 +818,7 @@ nav {
 }
 
 .site-footer__list a {
-    color: #9ca3af;
+    color: var(--text-gray-400);
     text-decoration: none;
     transition: color 0.3s ease;
 }
@@ -746,7 +828,7 @@ nav {
 }
 
 .site-footer__list--muted li {
-    color: #9ca3af;
+    color: var(--text-gray-400);
 }
 
 .site-footer__bottom {
@@ -756,7 +838,7 @@ nav {
     gap: 1rem;
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid #1e293b;
+    border-top: 1px solid var(--border-footer);
 }
 
 @media (min-width: 768px) {
@@ -771,7 +853,7 @@ nav {
 .site-footer__made {
     margin: 0;
     font-size: 0.875rem;
-    color: #9ca3af;
+    color: var(--text-gray-400);
 }
 
 .site-footer__made {
@@ -792,12 +874,16 @@ nav {
     }
 
     .hero {
-        padding: 3rem 0 4rem;
+        padding: 6rem 0 3.5rem;
+        min-height: auto;
     }
 
-    .about h2,
-    .cicd-section h2 {
-        font-size: 1.65rem;
+    .section-head {
+        margin-bottom: 2.5rem;
+    }
+
+    .section-head__title {
+        font-size: 1.75rem;
     }
 
     .pipeline-container {

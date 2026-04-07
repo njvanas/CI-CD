@@ -8,19 +8,15 @@
     <title>CI/CD Demo | NJ van As</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <nav>
+    <header id="site-header" class="site-header">
+        <nav class="site-header__nav" aria-label="Primary">
             <div class="container nav-inner">
-                <a class="logo" href="#home" title="CI/CD Demo — top of page">
-                    <span class="logo-mark" aria-hidden="true">C</span>
-                    <span class="logo-text">CI/CD Demo</span>
-                </a>
+                <a class="site-brand" href="https://njvanas.github.io/" title="NJ van As — portfolio home">NJ van As</a>
                 <ul class="nav-links">
-                    <li><a href="https://njvanas.github.io/">Portfolio</a></li>
                     <li><a href="#cicd">CI/CD</a></li>
                     <li><a href="#about">About</a></li>
                     <li><a id="nav-github-link" href="https://github.com/njvanas/CI-CD" target="_blank" rel="noopener noreferrer">GitHub</a></li>
@@ -31,20 +27,31 @@
 
     <main>
         <section id="home" class="hero">
-            <div class="container">
+            <div class="hero__bg" aria-hidden="true">
+                <div class="hero__bg-wash"></div>
+                <div class="hero__bg-radials"></div>
+            </div>
+            <div class="container hero__inner">
                 <p class="hero-eyebrow">GitHub Pages · CI/CD</p>
-                <h2>GitHub Pages CI/CD</h2>
-                <p>This page is a companion demo hosted under <a class="inline-link" href="https://njvanas.github.io/">njvanas.github.io</a>. It deploys automatically with GitHub Actions.</p>
+                <h1 class="hero__title">GitHub Pages CI/CD</h1>
+                <h2 class="hero__subtitle">Companion demo · automated deploy on every push</h2>
+                <p class="hero__lead">This page is hosted alongside <a class="inline-link" href="https://njvanas.github.io/">njvanas.github.io</a> and deploys automatically with GitHub Actions.</p>
                 <p class="hero-sub">Scroll down to see how commits flow from push to live site.</p>
-                <button type="button" class="cta-button" onclick="showMessage()">Try it</button>
+                <div class="hero__actions">
+                    <button type="button" class="btn btn--primary" onclick="showMessage()">Try it</button>
+                    <a class="btn btn--outline" href="#cicd">View pipeline</a>
+                </div>
                 <p id="message" class="hidden"></p>
             </div>
         </section>
 
-        <section id="cicd" class="cicd-section">
+        <section id="cicd" class="cicd-section scroll-target">
             <div class="container">
-                <h2>CI/CD Pipeline Visualization</h2>
-                <p class="section-subtitle">Watch how your code flows from commit to deployment</p>
+                <div class="section-head">
+                    <h2 class="section-head__title">CI/CD Pipeline Visualization</h2>
+                    <div class="section-head__rule" aria-hidden="true"></div>
+                    <p class="section-head__lead">Watch how your code flows from commit to deployment</p>
+                </div>
                 
                 <div class="pipeline-container">
                     <div class="pipeline-step" data-step="1">
@@ -127,18 +134,24 @@
                 </div>
                 
                 <div class="workflow-link">
-                    <a id="workflow-link" href="https://github.com/njvanas/CI-CD/actions" target="_blank" rel="noopener noreferrer" class="workflow-button">
+                    <a id="workflow-link" href="https://github.com/njvanas/CI-CD/actions" target="_blank" rel="noopener noreferrer" class="btn btn--primary workflow-button">
                         View workflow runs →
                     </a>
                 </div>
             </div>
         </section>
 
-        <section id="about" class="about">
+        <section id="about" class="about scroll-target">
             <div class="container">
-                <h2>About</h2>
-                <p>This is a demonstration website showcasing automated deployment to GitHub Pages using GitHub Actions.</p>
-                <p>Every time you push changes to the main branch, GitHub Actions will automatically build and deploy your site.</p>
+                <div class="section-head">
+                    <h2 class="section-head__title">About</h2>
+                    <div class="section-head__rule" aria-hidden="true"></div>
+                    <p class="section-head__lead">What this demo shows and how it stays in sync with your repo.</p>
+                </div>
+                <div class="about__body">
+                    <p>This is a demonstration website showcasing automated deployment to GitHub Pages using GitHub Actions.</p>
+                    <p>Every time you push changes to the main branch, GitHub Actions will automatically build and deploy your site.</p>
+                </div>
             </div>
         </section>
     </main>

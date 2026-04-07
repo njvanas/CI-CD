@@ -16,6 +16,19 @@ function showMessage() {
     messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// Fixed header: match portfolio (opaque bar + shadow after scroll)
+(function initHeaderScroll() {
+    const header = document.getElementById('site-header');
+    if (!header) return;
+    const onScroll = () => {
+        header.classList.toggle('site-header--scrolled', window.scrollY > 50);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('load', onScroll);
+    window.addEventListener('hashchange', onScroll);
+})();
+
 // Smooth scrolling for in-page navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
