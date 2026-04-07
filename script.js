@@ -16,14 +16,15 @@ function showMessage() {
     messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Smooth scrolling for navigation links
+// Smooth scrolling for in-page navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href === '#' || href === '#top') return;
+        const target = document.querySelector(href);
+        if (!target) return;
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-        }
+        target.scrollIntoView({ behavior: 'smooth' });
     });
 });
 
@@ -260,6 +261,7 @@ function defaultRepoUrl() {
 function detectRepository() {
     const workflowLink = document.getElementById('workflow-link');
     const footerRepoLink = document.getElementById('footer-repo-link');
+    const navGithubLink = document.getElementById('nav-github-link');
 
     let repoUrl = defaultRepoUrl();
     const hostname = window.location.hostname;
@@ -283,7 +285,15 @@ function detectRepository() {
     if (footerRepoLink) {
         footerRepoLink.href = repoUrl;
     }
+    if (navGithubLink) {
+        navGithubLink.href = repoUrl;
+    }
 }
 
 // Run on page load
 detectRepository();
+
+(function setFooterYear() {
+    const y = document.getElementById('footer-year');
+    if (y) y.textContent = String(new Date().getFullYear());
+})();

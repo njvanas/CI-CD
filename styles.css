@@ -32,6 +32,13 @@ body {
     color: var(--text-primary);
     background: var(--bg-deep);
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    width: 100%;
 }
 
 ::-webkit-scrollbar {
@@ -57,12 +64,13 @@ body {
     padding: 0 1.25rem;
 }
 
-/* Header & Navigation */
+/* Header & Navigation — sticky bar aligned with portfolio project pages */
 header {
-    background: var(--bg-header);
+    background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -81,9 +89,12 @@ nav {
 }
 
 .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
     font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: 700;
+    color: #60a5fa;
     text-decoration: none;
     letter-spacing: -0.02em;
     transition: color 0.2s ease;
@@ -91,6 +102,29 @@ nav {
 
 .logo:hover {
     color: #93c5fd;
+}
+
+.logo-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.logo-text {
+    color: #e2e8f0;
+    font-weight: 700;
+}
+
+.logo:hover .logo-text {
+    color: #fff;
 }
 
 .nav-links {
@@ -109,12 +143,12 @@ nav {
 }
 
 .nav-links a:hover {
-    color: #93c5fd;
+    color: #60a5fa;
 }
 
-/* Hero Section */
+/* Hero Section — aligned with njvanas.github.io project pages (slate / blue gradient) */
 .hero {
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 45%, #0f172a 100%);
+    background: linear-gradient(to bottom right, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
     color: var(--text-primary);
     padding: 4.5rem 0 5rem;
     text-align: center;
@@ -604,33 +638,151 @@ nav {
     max-width: 48rem;
 }
 
-/* Footer */
-footer {
-    background: #020617;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 2rem 0;
-    border-top: 1px solid var(--border);
+/* Footer — same structure as Office-Auto-Install / portfolio subpages */
+.site-footer {
+    width: 100%;
+    margin-top: auto;
+    background: #0f172a;
+    border-top: 1px solid #1e293b;
+    color: #94a3b8;
+    font-size: 0.9375rem;
 }
 
-.footer-inner p:first-child {
-    color: var(--text-muted);
-    font-size: 0.95rem;
+.site-footer__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 1.5rem;
 }
 
-.footer-links {
-    margin-top: 0.75rem;
-    font-size: 0.9rem;
+.site-footer__grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr;
 }
 
-.footer-links a {
-    color: #93c5fd;
-    text-decoration: none;
-    transition: color 0.2s ease;
+@media (min-width: 768px) {
+    .site-footer__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2rem;
+    }
 }
 
-.footer-links a:hover {
+.site-footer__title {
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #fff;
+    margin: 0 0 1rem;
+}
+
+.site-footer__tagline {
+    margin: 0 0 1rem;
+    color: #9ca3af;
+    line-height: 1.625;
+}
+
+.site-footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.site-footer__social li {
+    margin: 0;
+}
+
+.site-footer__social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: #1e293b;
+    color: #9ca3af;
+    border-radius: 0.5rem;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.site-footer__social-btn:hover {
+    background: #2563eb;
+    color: #fff;
+}
+
+.site-footer__icon {
+    display: block;
+    flex-shrink: 0;
+}
+
+.site-footer__heading {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.site-footer__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.site-footer__list li {
+    margin-bottom: 0.5rem;
+}
+
+.site-footer__list li:last-child {
+    margin-bottom: 0;
+}
+
+.site-footer__list a {
+    color: #9ca3af;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.site-footer__list a:hover {
+    color: #fff;
+}
+
+.site-footer__list--muted li {
+    color: #9ca3af;
+}
+
+.site-footer__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #1e293b;
+}
+
+@media (min-width: 768px) {
+    .site-footer__bottom {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.site-footer__legal,
+.site-footer__made {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #9ca3af;
+}
+
+.site-footer__made {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.site-footer__heart {
+    color: #ef4444;
+    flex-shrink: 0;
 }
 
 /* Responsive Design */
