@@ -20,7 +20,6 @@ package-lock.json
 
 # Build outputs
 dist/
-.preview/
 build/
 *.min.js
 *.min.css
