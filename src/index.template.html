@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GitHub Pages deployment with GitHub Actions — a CI/CD demo from NJ van As portfolio.">
-    <meta name="theme-color" content="#0a0e27">
-    <title>CI/CD Demo | NJ van As</title>
+    <meta name="description" content="Interactive CI/CD demo — edit content, push to GitHub, deploy to a Raspberry Pi homelab.">
+    <meta name="theme-color" content="{{themeColor}}">
+    <title>{{siteTitle}}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-repo-owner="{{repoOwner}}" data-repo-name="{{repoName}}">
     <header id="site-header" class="site-header">
         <nav class="site-header__nav" aria-label="Primary">
             <div class="container nav-inner">
                 <div class="site-header__brand">
-                    <a href="https://njvanas.github.io/" class="site-header__name" title="NJ van As — portfolio home">NJ van As</a>
+                    <a href="{{brandUrl}}" class="site-header__name" title="{{brandName}} — portfolio home">{{brandName}}</a>
                     <span class="site-header__sep" aria-hidden="true">·</span>
-                    <span class="site-header__page">CI/CD</span>
+                    <span class="site-header__page">{{pageLabel}}</span>
                 </div>
                 <ul class="nav-links">
                     <li><a href="#cicd">CI/CD</a></li>
                     <li><a href="#about">About</a></li>
-                    <li><a id="nav-github-link" href="https://github.com/njvanas/CI-CD" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                    <li><a id="nav-github-link" href="{{repoUrl}}" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                    <li><a class="nav-links__edit" href="/admin/">Edit site</a></li>
                 </ul>
             </div>
         </nav>
@@ -32,13 +33,13 @@
     <main class="main-shell">
         <section id="home" class="hero">
             <div class="container hero__inner">
-                <p class="hero-eyebrow">GitHub Pages · CI/CD</p>
-                <h1 class="hero__title">GitHub Pages CI/CD</h1>
-                <h2 class="hero__subtitle">Companion demo · automated deploy on every push</h2>
-                <p class="hero__lead">This page is hosted alongside <a class="inline-link" href="https://njvanas.github.io/">njvanas.github.io</a> and deploys automatically with GitHub Actions.</p>
-                <p class="hero-sub">Scroll down to see how commits flow from push to live site.</p>
+                <p class="hero-eyebrow">{{heroEyebrow}}</p>
+                <h1 class="hero__title">{{heroTitle}}</h1>
+                <h2 class="hero__subtitle">{{heroSubtitle}}</h2>
+                <p class="hero__lead">{{heroLead}}</p>
+                <p class="hero-sub">{{heroSub}}</p>
                 <div class="hero__actions">
-                    <button type="button" class="btn btn--primary" onclick="showMessage()">Try it</button>
+                    <a class="btn btn--primary" href="/admin/">Open editor</a>
                     <a class="btn btn--outline" href="#cicd">View pipeline</a>
                 </div>
                 <p id="message" class="hidden"></p>
@@ -48,94 +49,84 @@
         <section id="cicd" class="cicd-section scroll-target">
             <div class="container">
                 <div class="section-head">
-                    <h2 class="section-head__title">CI/CD Pipeline Visualization</h2>
+                    <h2 class="section-head__title">CI/CD Pipeline</h2>
                     <div class="section-head__rule" aria-hidden="true"></div>
-                    <p class="section-head__lead">Watch how your code flows from commit to deployment</p>
+                    <p class="section-head__lead">Live status from your last deployment — edit in the admin panel to trigger a real run.</p>
                 </div>
-                
-                <div class="pipeline-container">
-                    <div class="pipeline-step" data-step="1">
+
+                <div id="pipeline-live" class="pipeline-container" aria-live="polite">
+                    <div class="pipeline-step" data-step="1" data-pipeline-step="commit">
                         <div class="step-icon">📝</div>
                         <div class="step-content">
-                            <h3>1. Code Commit</h3>
-                            <p>Developer pushes code to GitHub</p>
-                            <div class="step-status active">
-                                <span class="status-dot"></span>
-                                <span>Triggered</span>
-                            </div>
+                            <h3>1. Commit &amp; push</h3>
+                            <p>Editor saves <code>content/site.json</code> and pushes to GitHub</p>
+                            <div class="step-status" id="step-status-1"><span class="status-dot"></span><span>Waiting</span></div>
                         </div>
                     </div>
-                    
                     <div class="pipeline-arrow">→</div>
-                    
-                    <div class="pipeline-step" data-step="2">
-                        <div class="step-icon">🔍</div>
+                    <div class="pipeline-step" data-step="2" data-pipeline-step="workflow">
+                        <div class="step-icon">⚙️</div>
                         <div class="step-content">
                             <h3>2. GitHub Actions</h3>
-                            <p>Workflow automatically starts</p>
-                            <div class="step-status active">
-                                <span class="status-dot"></span>
-                                <span>Running</span>
-                            </div>
+                            <p id="workflow-step-label">{{runnerLabel}}</p>
+                            <div class="step-status" id="step-status-2"><span class="status-dot"></span><span>Waiting</span></div>
                         </div>
                     </div>
-                    
                     <div class="pipeline-arrow">→</div>
-                    
-                    <div class="pipeline-step" data-step="3">
+                    <div class="pipeline-step" data-step="3" data-pipeline-step="build">
                         <div class="step-icon">🔨</div>
                         <div class="step-content">
-                            <h3>3. Build & Test</h3>
-                            <p>Code is validated and prepared</p>
-                            <div class="step-status active">
-                                <span class="status-dot"></span>
-                                <span>Processing</span>
-                            </div>
+                            <h3>3. Build</h3>
+                            <p><code>npm run build</code> generates static files into <code>dist/</code></p>
+                            <div class="step-status" id="step-status-3"><span class="status-dot"></span><span>Waiting</span></div>
                         </div>
                     </div>
-                    
                     <div class="pipeline-arrow">→</div>
-                    
-                    <div class="pipeline-step" data-step="4">
+                    <div class="pipeline-step" data-step="4" data-pipeline-step="deploy">
                         <div class="step-icon">🚀</div>
                         <div class="step-content">
-                            <h3>4. Deploy</h3>
-                            <p>Site goes live on GitHub Pages</p>
-                            <div class="step-status success">
-                                <span class="status-dot"></span>
-                                <span>Deployed</span>
-                            </div>
+                            <h3>4. Deploy to Pi</h3>
+                            <p>Artifacts land on <strong>{{deployHost}}</strong> and go live via Traefik</p>
+                            <div class="step-status" id="step-status-4"><span class="status-dot"></span><span>Waiting</span></div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="deployment-info">
                     <div class="info-card">
                         <div class="info-icon">⏱️</div>
                         <div class="info-content">
-                            <h4>Deployment Time</h4>
-                            <p id="deploy-time">~2 minutes</p>
+                            <h4>Last deploy</h4>
+                            <p id="deploy-time">—</p>
                         </div>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">🔄</div>
                         <div class="info-content">
-                            <h4>Auto-Deploy</h4>
-                            <p>On every push to main</p>
+                            <h4>Trigger</h4>
+                            <p>Push to <code>master</code> or admin deploy</p>
                         </div>
                     </div>
                     <div class="info-card">
                         <div class="info-icon">✅</div>
                         <div class="info-content">
                             <h4>Status</h4>
-                            <p id="deploy-status">Live & Running</p>
+                            <p id="deploy-status">Idle</p>
                         </div>
                     </div>
                 </div>
-                
+
+                <div id="deploy-log" class="deploy-log hidden" aria-label="Deployment log">
+                    <div class="deploy-log__head">
+                        <strong>Workflow log</strong>
+                        <span id="deploy-log-meta"></span>
+                    </div>
+                    <pre id="deploy-log-body"></pre>
+                </div>
+
                 <div class="workflow-link">
-                    <a id="workflow-link" href="https://github.com/njvanas/CI-CD/actions" target="_blank" rel="noopener noreferrer" class="btn btn--primary workflow-button">
-                        View workflow runs →
+                    <a id="workflow-link" href="{{actionsUrl}}" target="_blank" rel="noopener noreferrer" class="btn btn--primary workflow-button">
+                        View on GitHub Actions →
                     </a>
                 </div>
             </div>
@@ -144,13 +135,12 @@
         <section id="about" class="about scroll-target">
             <div class="container">
                 <div class="section-head">
-                    <h2 class="section-head__title">About</h2>
+                    <h2 class="section-head__title">{{aboutTitle}}</h2>
                     <div class="section-head__rule" aria-hidden="true"></div>
-                    <p class="section-head__lead">What this demo shows and how it stays in sync with your repo.</p>
+                    <p class="section-head__lead">{{aboutLead}}</p>
                 </div>
                 <div class="about__body">
-                    <p>This is a demonstration website showcasing automated deployment to GitHub Pages using GitHub Actions.</p>
-                    <p>Every time you push changes to the main branch, GitHub Actions will automatically build and deploy your site.</p>
+                    {{aboutBody}}
                 </div>
             </div>
         </section>
@@ -160,7 +150,7 @@
         <div class="site-footer__inner">
             <div class="site-footer__grid">
                 <div class="site-footer__brand">
-                    <h3 class="site-footer__title">NJ van As</h3>
+                    <h3 class="site-footer__title">{{brandName}}</h3>
                     <p class="site-footer__tagline">
                         Senior Cloud &amp; Microsoft 365 Engineer—architecting secure, scalable infrastructure
                         for 60+ organizations and passionate about turning complex systems into reliable foundations.
@@ -183,7 +173,6 @@
                         </li>
                     </ul>
                 </div>
-
                 <div class="site-footer__links">
                     <h4 class="site-footer__heading">Quick Links</h4>
                     <ul class="site-footer__list">
@@ -191,10 +180,9 @@
                         <li><a href="https://njvanas.github.io/#experience">Experience</a></li>
                         <li><a href="https://njvanas.github.io/#projects">Projects</a></li>
                         <li><a href="https://njvanas.github.io/#contact">Contact</a></li>
-                        <li><a id="footer-repo-link" href="https://github.com/njvanas/CI-CD" target="_blank" rel="noopener noreferrer">This demo (GitHub)</a></li>
+                        <li><a id="footer-repo-link" href="{{repoUrl}}" target="_blank" rel="noopener noreferrer">This demo (GitHub)</a></li>
                     </ul>
                 </div>
-
                 <div class="site-footer__expertise">
                     <h4 class="site-footer__heading">Expertise</h4>
                     <ul class="site-footer__list site-footer__list--muted">
@@ -206,21 +194,13 @@
                     </ul>
                 </div>
             </div>
-
             <div class="site-footer__bottom">
-                <p class="site-footer__legal">
-                    © <span id="footer-year"></span> NJ van As. All rights reserved.
-                </p>
-                <p class="site-footer__made">
-                    Made with
-                    <svg class="site-footer__heart" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    in the Netherlands
-                </p>
+                <p class="site-footer__legal">© <span id="footer-year"></span> {{brandName}}. All rights reserved.</p>
+                <p class="site-footer__made">Hosted on {{deployHost}} · deployed by GitHub Actions</p>
             </div>
         </div>
     </footer>
 
-    <!-- Modal Popup -->
     <div id="step-modal" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>

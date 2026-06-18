@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI/CD Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="admin-header">
+    <div class="admin-header__inner">
+      <div>
+        <p class="admin-eyebrow">CI/CD demo · homelab editor</p>
+        <h1>Site editor</h1>
+      </div>
+      <div class="admin-header__actions">
+        <a class="btn btn--ghost" href="/" target="_blank" rel="noopener">View live site</a>
+        <button type="button" class="btn btn--ghost" id="btn-preview">Refresh preview</button>
+        <button type="button" class="btn btn--primary" id="btn-deploy">Deploy changes</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-layout">
+    <aside class="admin-panel">
+      <form id="editor-form" class="editor-form">
+        <section class="editor-section">
+          <h2>Hero</h2>
+          <label>Eyebrow<input name="hero.eyebrow" type="text"></label>
+          <label>Title<input name="hero.title" type="text"></label>
+          <label>Subtitle<input name="hero.subtitle" type="text"></label>
+          <label>Lead<textarea name="hero.lead" rows="3"></textarea></label>
+          <label>Subtext<textarea name="hero.sub" rows="2"></textarea></label>
+        </section>
+
+        <section class="editor-section">
+          <h2>About</h2>
+          <label>Section title<input name="about.title" type="text"></label>
+          <label>Lead<textarea name="about.lead" rows="2"></textarea></label>
+          <label>Paragraph 1<textarea name="about.paragraphs.0" rows="3"></textarea></label>
+          <label>Paragraph 2<textarea name="about.paragraphs.1" rows="3"></textarea></label>
+        </section>
+
+        <section class="editor-section">
+          <h2>Theme</h2>
+          <label>Preset
+            <select name="theme.preset" id="theme-preset">
+              <option value="midnight">Midnight</option>
+              <option value="ocean">Ocean</option>
+              <option value="sunset">Sunset</option>
+              <option value="forest">Forest</option>
+            </select>
+          </label>
+          <label>Accent colour<input name="theme.accent" type="color" id="theme-accent"></label>
+        </section>
+
+        <section class="editor-section">
+          <h2>Meta</h2>
+          <label>Browser title<input name="meta.siteTitle" type="text"></label>
+          <label>Deploy host label<input name="deploy.hostLabel" type="text"></label>
+        </section>
+      </form>
+    </aside>
+
+    <section class="admin-preview">
+      <div class="admin-preview__bar">
+        <span>Live preview (local build)</span>
+        <span id="preview-status" class="preview-status">Ready</span>
+      </div>
+      <iframe id="preview-frame" title="Site preview" src="/api/preview/"></iframe>
+    </section>
+
+    <section class="admin-pipeline">
+      <div class="admin-pipeline__head">
+        <h2>Deployment pipeline</h2>
+        <p id="pipeline-summary">Edit content, deploy, and watch each CI/CD step complete.</p>
+      </div>
+      <ol class="pipeline-timeline" id="pipeline-timeline">
+        <li data-phase="push"><span class="dot"></span><div><strong>Push to GitHub</strong><p id="phase-push">Waiting</p></div></li>
+        <li data-phase="workflow"><span class="dot"></span><div><strong>GitHub Actions</strong><p id="phase-workflow">Waiting</p></div></li>
+        <li data-phase="build"><span class="dot"></span><div><strong>Build</strong><p id="phase-build">Waiting</p></div></li>
+        <li data-phase="deploy"><span class="dot"></span><div><strong>Deploy to Pi</strong><p id="phase-deploy">Waiting</p></div></li>
+        <li data-phase="live"><span class="dot"></span><div><strong>Live site</strong><p id="phase-live">Waiting</p></div></li>
+      </ol>
+      <pre id="pipeline-log" class="pipeline-log" aria-live="polite"></pre>
+      <a id="actions-link" class="btn btn--ghost" href="#" target="_blank" rel="noopener">Open GitHub Actions</a>
+    </section>
+  </main>
+
+  <script src="admin.js" type="module"></script>
+</body>
+</html>

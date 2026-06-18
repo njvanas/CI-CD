@@ -1,148 +1,76 @@
-# GitHub Pages CI/CD Demo
+# CI/CD Interactive Demo
 
-A modern website template with automated CI/CD deployment to GitHub Pages using GitHub Actions. **Fork this repository to deploy your own version!**
+A hands-on **CI/CD teaching demo**: edit site content in a browser, push to GitHub, watch GitHub Actions build and deploy, see the live site update on a Raspberry Pi homelab.
 
-## 🚀 Features
+Previously a static GitHub Pages template with a *simulated* pipeline. It is now **content-driven**, **editor-backed**, and wired to **real automation**.
 
-- **Automated Deployment**: Every push to `main` branch automatically deploys to GitHub Pages
-- **Modern UI**: Clean, responsive design with smooth animations
-- **CI/CD Pipeline**: GitHub Actions workflow handles the entire deployment process
-- **Zero Configuration**: Works out of the box after initial setup
-- **Fork-Ready**: Automatically detects your repository and works with any GitHub username
+## Architecture
 
-## 📋 Prerequisites
+```text
+┌─────────────────┐     git push      ┌──────────────────┐
+│  /admin editor  │ ────────────────► │  GitHub repo     │
+│  (Pi container) │                   │  content/site.json│
+└────────┬────────┘                   └────────┬─────────┘
+         │ preview build                       │ webhook
+         │                                     ▼
+         │                            ┌──────────────────┐
+         │                            │ GitHub Actions   │
+         │                            │ (self-hosted Pi) │
+         │                            │ npm run build    │
+         │                            └────────┬─────────┘
+         │                                     │ rsync
+         ▼                                     ▼
+┌─────────────────────────────────────────────────────────┐
+│  ~/docker/cicd/www  ←  Traefik  ←  Cloudflare Tunnel   │
+│  https://cicd.dolfieshome.org                           │
+└─────────────────────────────────────────────────────────┘
+```
 
-- A GitHub account
-- Git installed on your local machine
+## What's in the repo
 
-## 🛠️ Quick Start (Fork Method - Recommended)
+| Path | Purpose |
+|------|---------|
+| `content/site.json` | **Source of truth** — text + theme (editable) |
+| `scripts/build.mjs` | Builds static site into `dist/` |
+| `src/` | HTML template, CSS/JS bases, icons |
+| `admin/` | Browser editor UI |
+| `services/cicd-api/` | API: preview, git push, Actions status (SSE) |
+| `deploy/pi/compose.yaml` | Pi Docker stack (Traefik labels included) |
+| `.github/workflows/deploy-pi.yml` | Real CI/CD pipeline |
+| `HOMELAB.md` | Step-by-step Pi setup (runner, keys, DNS) |
 
-### Option 1: Fork This Repository
+Legacy `.github/workflows/deploy.yml` still publishes to **GitHub Pages** if you enable it — optional. Primary target is **Pi hosting**.
 
-1. Click the **Fork** button at the top of this repository
-2. Your fork will be created at `https://github.com/YOUR_USERNAME/TEMP-CI-CD`
-3. Go to **Settings** → **Pages** in your forked repository
-4. Under "Source", select **GitHub Actions**
-5. Click **Save**
-6. Push any change (or wait for the workflow to run automatically)
-7. Your site will be live at: `https://YOUR_USERNAME.github.io/TEMP-CI-CD/`
-
-## 🛠️ Setup Instructions (Manual Method)
-
-### 1. Create a GitHub Repository
-
-1. Go to [github.com/new](https://github.com/new)
-2. Name your repository (e.g., `my-website`)
-3. Choose **Public** (required for free GitHub Pages)
-4. **Do NOT** initialize with README, .gitignore, or license
-5. Click "Create repository"
-
-### 2. Clone or Download This Repository
+## Local build
 
 ```bash
-# Clone this repository
-git clone https://github.com/YOUR_USERNAME/TEMP-CI-CD.git
-cd TEMP-CI-CD
-
-# Or download and extract the ZIP file, then:
-cd TEMP-CI-CD
-git init
+npm run build
+# output in dist/
 ```
 
-### 3. Push to Your GitHub Repository
+## Pi deployment
 
-```bash
-# Add your GitHub repository as remote (replace YOUR_USERNAME and YOUR_REPO)
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+See **[HOMELAB.md](HOMELAB.md)** for full setup:
 
-# Add all files
-git add .
+1. Clone repo on Pi  
+2. Register **self-hosted GitHub Actions runner** (build runs on the Pi — not GitHub cloud)  
+3. Deploy key for git push from editor  
+4. `GITHUB_TOKEN` for live pipeline status in UI  
+5. `docker compose -f deploy/pi/compose.yaml up -d`  
+6. `cloudflared tunnel route dns homelab cicd.dolfieshome.org`  
 
-# Create initial commit
-git commit -m "Initial commit: GitHub Pages CI/CD setup"
+## Demo flow (what students/users see)
 
-# Push to GitHub
-git branch -M main
-git push -u origin main
-```
+1. Open **`/admin/`** — edit hero text or pick a theme preset  
+2. Preview updates locally (instant)  
+3. Click **Deploy changes**  
+4. Watch: **Push → Actions → Build → Deploy → Live**  
+5. Open **`/`** — see the real updated site  
 
-### 4. Enable GitHub Pages
+## Customization without the editor
 
-**IMPORTANT**: You must enable GitHub Pages BEFORE the workflow runs:
+Edit `content/site.json`, run `npm run build`, commit, push — same pipeline.
 
-1. Go to your repository on GitHub: `https://github.com/YOUR_USERNAME/YOUR_REPO_NAME`
-2. Click **Settings** → **Pages** (in the left sidebar)
-3. Under "Source", select **GitHub Actions**
-4. Click **Save**
-5. The workflow will automatically run and deploy your site
+## License
 
-**If you see an error**: "Get Pages site failed" or "Not Found", it means Pages hasn't been enabled yet. Follow steps 1-4 above first, then re-run the workflow.
-
-### 5. Access Your Website
-
-After the workflow completes (usually takes 1-2 minutes), your site will be available at:
-```
-https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
-```
-
-**Note**: The website automatically detects your repository URL, so all links will work correctly for your fork!
-
-## 🔄 How CI/CD Works
-
-1. **Push to main branch** → Triggers GitHub Actions workflow
-2. **Workflow runs** → Checks out code, prepares deployment
-3. **Deploys to GitHub Pages** → Your site is live automatically
-
-The workflow file (`.github/workflows/deploy.yml`) handles everything automatically.
-
-## 📁 Project Structure
-
-```
-.
-├── index.html          # Main HTML file
-├── styles.css          # Stylesheet
-├── script.js           # JavaScript functionality
-├── .github/
-│   └── workflows/
-│       └── deploy.yml  # CI/CD workflow (works automatically!)
-├── .gitignore          # Git ignore rules
-├── README.md           # This file
-└── SETUP.md            # Detailed setup guide for forking
-```
-
-**See [SETUP.md](SETUP.md) for detailed fork instructions.**
-
-## 🎨 Customization
-
-- Edit `index.html` to change content
-- Modify `styles.css` to update styling
-- Add functionality in `script.js`
-- Push changes → Automatic deployment!
-
-## 📝 Notes
-
-- GitHub Pages is free for public repositories
-- Deployment typically takes 1-2 minutes after push
-- You can manually trigger deployment via Actions tab → "Deploy to GitHub Pages" → "Run workflow"
-
-## 🔄 Forking This Repository
-
-This repository is designed to work automatically when forked:
-
-- **Repository links** are automatically detected from your GitHub Pages URL
-- **Workflow links** point to your repository's Actions tab
-- **No configuration needed** - just fork, enable Pages, and deploy!
-
-## 🔗 Resources
-
-- [GitHub Pages Documentation](https://docs.github.com/en/pages)
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [How to Fork a Repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
-
-## 📄 License
-
-This project is open source and available for personal and commercial use.
-
----
-
-**Happy Deploying! 🎉**
+Open source — use for teaching, portfolio, homelab demos.

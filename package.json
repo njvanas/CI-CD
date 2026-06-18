@@ -1,0 +1,9 @@
+{
+  "name": "ci-cd-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev:build": "node scripts/build.mjs --watch"
+  }
+}
