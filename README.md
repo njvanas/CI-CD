@@ -4,10 +4,11 @@ A modern website template with automated CI/CD deployment to GitHub Pages using 
 
 ## 🚀 Features
 
-- **Automated Deployment**: Every push to `main` branch automatically deploys to GitHub Pages
+- **Automated Deployment**: Every push to `main`/`master` automatically deploys to GitHub Pages
+- **Try it button**: Visitors can trigger a real GitHub Pages redeploy from the live site
+- **Deploy timestamp**: The header shows the date and time of the last Pages publish
+- **Rate limits**: Same IP can use Try it once every 5 minutes, up to 5 times per UTC day
 - **Modern UI**: Clean, responsive design with smooth animations
-- **CI/CD Pipeline**: GitHub Actions workflow handles the entire deployment process
-- **Zero Configuration**: Works out of the box after initial setup
 - **Fork-Ready**: Automatically detects your repository and works with any GitHub username
 
 ## 📋 Prerequisites
@@ -90,10 +91,35 @@ https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
 ## 🔄 How CI/CD Works
 
 1. **Push to main branch** → Triggers GitHub Actions workflow
-2. **Workflow runs** → Checks out code, prepares deployment
+2. **Workflow runs** → Checks out code, stamps the deploy time, prepares Pages
 3. **Deploys to GitHub Pages** → Your site is live automatically
 
 The workflow file (`.github/workflows/deploy.yml`) handles everything automatically.
+
+## 🧪 Try it button
+
+The live site can trigger another GitHub Pages deploy without a git push:
+
+1. Visitor clicks **Try it**
+2. The page looks up their IP, hashes it, and starts `.github/workflows/try-it.yml`
+3. A gate job enforces **5 minutes between deploys** and **5 deploys per IP per UTC day** (plus a global safety cap of 100 Try it deploys per day, and only one Pages deploy at a time)
+4. If allowed, the same Pages deploy workflow runs again and writes a new timestamp into the header
+
+### Arm Try it (required once)
+
+GitHub Pages is static, so the button needs a tightly scoped token baked into the published site at deploy time.
+
+1. Create a **fine-grained personal access token**
+   - Resource owner: your account
+   - Repository access: **only this repository**
+   - Repository permissions: **Actions: Read and write** (nothing else)
+2. In the repository go to **Settings → Secrets and variables → Actions**
+3. Add a secret named `TRY_IT_DISPATCH_TOKEN` with that token
+4. Re-run **Deploy to GitHub Pages** (or push any change)
+
+Until that secret exists, the button shows a setup message instead of starting a deploy.
+
+Hashed visitor keys (not raw IPs) are stored on a dedicated `try-it-state` branch so the gate can remember cooldowns without touching `master`.
 
 ## 📁 Project Structure
 
@@ -102,9 +128,12 @@ The workflow file (`.github/workflows/deploy.yml`) handles everything automatica
 ├── index.html          # Main HTML file
 ├── styles.css          # Stylesheet
 ├── script.js           # JavaScript functionality
+├── scripts/            # Deploy stamp + Try it rate-limit gate
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml  # CI/CD workflow (works automatically!)
+│       ├── deploy.yml  # CI/CD workflow (works automatically!)
+│       ├── try-it.yml  # Rate-limited deploy triggered by Try it
+│       └── test.yml    # Unit tests for rate-limit rules
 ├── .gitignore          # Git ignore rules
 ├── README.md           # This file
 └── SETUP.md            # Detailed setup guide for forking
@@ -124,6 +153,7 @@ The workflow file (`.github/workflows/deploy.yml`) handles everything automatica
 - GitHub Pages is free for public repositories
 - Deployment typically takes 1-2 minutes after push
 - You can manually trigger deployment via Actions tab → "Deploy to GitHub Pages" → "Run workflow"
+- Try it also triggers a real Pages deploy, with per-IP rate limits so the queue cannot be spammed
 
 ## 🔄 Forking This Repository
 

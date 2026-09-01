@@ -5,7 +5,14 @@ on:
     branches:
       - main
       - master
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      source:
+        description: What triggered this deploy
+        type: string
+        required: false
+        default: push
 
 permissions:
   contents: read
@@ -13,7 +20,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -22,10 +29,16 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Stamp deploy metadata
+        env:
+          DEPLOY_SOURCE: ${{ inputs.source || github.event_name }}
+          TRY_IT_TOKEN: ${{ secrets.TRY_IT_DISPATCH_TOKEN }}
+        run: node scripts/stamp-deploy.mjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

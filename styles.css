@@ -6,7 +6,7 @@
 
 :root {
     /* Aligned with njvanas.github.io + typing-speed-test companion pages */
-    --header-h: 5.5rem;
+    --header-h: 6.25rem;
     --bg-deep: #0a0e27;
     --bg-elevated: rgba(30, 41, 59, 0.5);
     --bg-card: rgba(15, 23, 42, 0.5);
@@ -175,6 +175,35 @@ main {
     color: var(--text-gray-400);
 }
 
+.site-header__deploy {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin-left: 0.15rem;
+    padding: 0.18rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.45);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-gray-400);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.site-header__deploy-label {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.62rem;
+    color: var(--text-subtle);
+}
+
+.site-header__deploy time {
+    color: var(--blue-300);
+    font-variant-numeric: tabular-nums;
+}
+
 .nav-links {
     display: flex;
     list-style: none;
@@ -322,6 +351,20 @@ main {
     transform: translateY(1px);
 }
 
+.btn:disabled,
+.btn[aria-busy="true"] {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    pointer-events: none;
+}
+
+.btn--primary:disabled:hover,
+.btn--primary[aria-busy="true"]:hover {
+    background: var(--accent);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.25);
+}
+
 .btn--outline {
     background: transparent;
     color: var(--blue-400);
@@ -342,10 +385,23 @@ main {
     border-radius: 0.5rem;
     display: inline-block;
     color: #e2e8f0;
+    max-width: 36rem;
 }
 
 #message.hidden {
     display: none;
+}
+
+#message.is-pending {
+    border-color: rgba(59, 130, 246, 0.55);
+}
+
+#message.is-success {
+    border-color: rgba(34, 197, 94, 0.65);
+}
+
+#message.is-error {
+    border-color: rgba(239, 68, 68, 0.65);
 }
 
 /* Section titles — compact like typing-speed-test .section-title */
@@ -921,6 +977,11 @@ main {
 @media (max-width: 768px) {
     .nav-links {
         gap: 1rem;
+    }
+
+    .site-header__deploy {
+        white-space: normal;
+        max-width: 100%;
     }
 
     .main-shell {

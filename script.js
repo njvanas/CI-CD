@@ -1,20 +1,487 @@
-// Simple interactive functionality
-function showMessage() {
+const TRY_IT_COOLDOWN_MS = 5 * 60 * 1000;
+const TRY_IT_MAX_PER_DAY = 5;
+const TRY_IT_LS_KEY = 'try-it-rate';
+
+function tryItConfig() {
+    return window.__TRY_IT_CONFIG__ || null;
+}
+
+function utcDay(date = new Date()) {
+    return date.toISOString().slice(0, 10);
+}
+
+function formatDeployStamp(iso) {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return '';
+    const formatted = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'UTC',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    }).format(date);
+    return `${formatted} UTC`;
+}
+
+function formatDuration(seconds) {
+    const total = Math.max(1, Math.ceil(Number(seconds) || 0));
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m ${secs}s`;
+    return `${secs}s`;
+}
+
+function syncHeaderHeight() {
+    const header = document.getElementById('site-header');
+    if (!header) return;
+    document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
+}
+
+function showSiteMessage(text, variant = '') {
     const messageEl = document.getElementById('message');
-    const messages = [
-        '🚀 CI/CD is working!',
-        '✨ GitHub Actions deployed this!',
-        '🎉 Your site is live!',
-        '⚡ Automated deployment successful!'
-    ];
-    
-    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    messageEl.textContent = randomMessage;
-    messageEl.classList.remove('hidden');
-    
-    // Smooth scroll to message
+    if (!messageEl) return;
+    messageEl.textContent = text;
+    messageEl.classList.remove('hidden', 'is-pending', 'is-success', 'is-error');
+    if (variant) messageEl.classList.add(variant);
     messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
+function hideSiteMessage() {
+    const messageEl = document.getElementById('message');
+    if (!messageEl) return;
+    messageEl.classList.add('hidden');
+    messageEl.classList.remove('is-pending', 'is-success', 'is-error');
+}
+
+function readLocalRate() {
+    try {
+        return JSON.parse(localStorage.getItem(TRY_IT_LS_KEY) || 'null') || null;
+    } catch {
+        return null;
+    }
+}
+
+function writeLocalRate(data) {
+    try {
+        localStorage.setItem(TRY_IT_LS_KEY, JSON.stringify(data));
+    } catch {
+        /* ignore quota / private mode */
+    }
+}
+
+function localRateDecision(now = new Date()) {
+    const stored = readLocalRate();
+    if (!stored) return { allowed: true, remainingToday: TRY_IT_MAX_PER_DAY };
+    const day = utcDay(now);
+    const count = stored.day === day ? Number(stored.count) || 0 : 0;
+    if (count >= TRY_IT_MAX_PER_DAY) {
+        const tomorrow = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+        return {
+            allowed: false,
+            reason: 'daily_limit',
+            retryAfterSeconds: Math.max(1, Math.ceil((tomorrow - now.getTime()) / 1000)),
+            remainingToday: 0
+        };
+    }
+    if (stored.lastAt) {
+        const elapsed = now.getTime() - Date.parse(stored.lastAt);
+        if (Number.isFinite(elapsed) && elapsed < TRY_IT_COOLDOWN_MS) {
+            return {
+                allowed: false,
+                reason: 'cooldown',
+                retryAfterSeconds: Math.max(1, Math.ceil((TRY_IT_COOLDOWN_MS - elapsed) / 1000)),
+                remainingToday: TRY_IT_MAX_PER_DAY - count
+            };
+        }
+    }
+    return { allowed: true, remainingToday: TRY_IT_MAX_PER_DAY - count };
+}
+
+function rememberLocalSuccess(now = new Date()) {
+    const day = utcDay(now);
+    const stored = readLocalRate();
+    const count = stored && stored.day === day ? Number(stored.count) || 0 : 0;
+    writeLocalRate({ day, count: count + 1, lastAt: now.toISOString() });
+}
+
+function rateLimitMessage(reason, retryAfterSeconds, remainingToday) {
+    if (reason === 'cooldown') {
+        return `Please wait ${formatDuration(retryAfterSeconds)} before triggering another deploy from this network.`;
+    }
+    if (reason === 'daily_limit') {
+        return `This network has used all 5 Try it deploys for today. Try again in ${formatDuration(retryAfterSeconds)}.`;
+    }
+    if (reason === 'busy') {
+        return `A deploy is already running. Try again in about ${formatDuration(retryAfterSeconds || 30)}.`;
+    }
+    if (reason === 'global_limit') {
+        return `Try it has reached today's safety cap. Please come back in ${formatDuration(retryAfterSeconds)}.`;
+    }
+    if (reason === 'invalid_key') {
+        return 'Could not verify this visitor for rate limiting. Refresh the page and try again.';
+    }
+    if (remainingToday != null) {
+        return `Deploy was not started (${reason}). ${remainingToday} Try it ${remainingToday === 1 ? 'use' : 'uses'} left today.`;
+    }
+    return 'Deploy was not started. Please try again later.';
+}
+
+function parseResultStepName(name) {
+    const m = String(name || '').match(/^try-it-result\s+(\w+)(?:\s+(\d+))?(?:\s+(\d+))?$/);
+    if (!m) return null;
+    return {
+        reason: m[1],
+        retryAfterSeconds: m[2] ? Number(m[2]) : 0,
+        remainingToday: m[3] != null ? Number(m[3]) : undefined
+    };
+}
+
+async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function lookupVisitorIp() {
+    const controllers = [];
+    const fetchText = async (url) => {
+        const ctrl = new AbortController();
+        controllers.push(ctrl);
+        const timer = setTimeout(() => ctrl.abort(), 5000);
+        try {
+            const res = await fetch(url, { signal: ctrl.signal });
+            if (!res.ok) throw new Error(String(res.status));
+            return await res.text();
+        } finally {
+            clearTimeout(timer);
+        }
+    };
+
+    const readers = [
+        async () => JSON.parse(await fetchText('https://api.ipify.org?format=json')).ip,
+        async () => JSON.parse(await fetchText('https://api64.ipify.org?format=json')).ip,
+        async () => {
+            const text = await fetchText('https://cloudflare.com/cdn-cgi/trace');
+            const match = text.match(/^ip=(.+)$/m);
+            if (!match) throw new Error('no ip');
+            return match[1];
+        }
+    ];
+
+    for (const read of readers) {
+        try {
+            const ip = String(await read() || '').trim();
+            if (ip) return ip;
+        } catch {
+            /* try next */
+        }
+    }
+    throw new Error('Could not determine your IP address');
+}
+
+function githubHeaders(token) {
+    return {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+    };
+}
+
+async function githubFetch(path, token, options = {}) {
+    const res = await fetch(`https://api.github.com${path}`, {
+        ...options,
+        headers: {
+            ...githubHeaders(token),
+            ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+            ...(options.headers || {})
+        }
+    });
+    const text = await res.text();
+    let json = null;
+    try {
+        json = text ? JSON.parse(text) : null;
+    } catch {
+        json = null;
+    }
+    return { ok: res.ok, status: res.status, json, text };
+}
+
+function newRequestId() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return `tryit-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+async function dispatchTryIt(config, requestId, visitorKey) {
+    const path = `/repos/${config.owner}/${config.repo}/actions/workflows/${config.workflow}/dispatches`;
+    const body = JSON.stringify({
+        ref: config.ref || 'master',
+        inputs: {
+            request_id: requestId,
+            visitor_key: visitorKey
+        }
+    });
+    const result = await githubFetch(path, config.token, { method: 'POST', body });
+    if (result.status === 204 || result.status === 200) {
+        return result.json && result.json.workflow_run_id
+            ? { runId: result.json.workflow_run_id }
+            : { runId: null };
+    }
+    if (result.status === 401 || result.status === 403) {
+        throw new Error('Try it is not authorized to start a deploy. The dispatch token may be missing or expired.');
+    }
+    if (result.status === 422) {
+        throw new Error('GitHub rejected the deploy request. The Try it workflow may not exist on this branch yet.');
+    }
+    throw new Error(result.json?.message || `GitHub returned ${result.status}`);
+}
+
+async function findTryItRun(config, requestId) {
+    const path = `/repos/${config.owner}/${config.repo}/actions/workflows/${config.workflow}/runs?event=workflow_dispatch&per_page=20`;
+    const needle = `try-it ${requestId}`;
+    const deadline = Date.now() + 45000;
+    while (Date.now() < deadline) {
+        const { ok, json } = await githubFetch(path, config.token);
+        if (ok) {
+            const match = (json.workflow_runs || []).find((run) => {
+                const title = `${run.name || ''} ${run.display_title || ''}`;
+                return title.includes(needle) || title.includes(requestId);
+            });
+            if (match) return match;
+        }
+        await new Promise((r) => setTimeout(r, 2000));
+    }
+    throw new Error('Started a deploy request, but could not find the GitHub Actions run.');
+}
+
+async function waitForGateResult(config, run) {
+    const deadline = Date.now() + 180000;
+    let latest = run;
+    while (Date.now() < deadline) {
+        const runRes = await githubFetch(
+            `/repos/${config.owner}/${config.repo}/actions/runs/${latest.id}`,
+            config.token
+        );
+        if (runRes.ok) latest = runRes.json;
+
+        const jobsRes = await githubFetch(
+            `/repos/${config.owner}/${config.repo}/actions/runs/${latest.id}/jobs`,
+            config.token
+        );
+        const jobs = jobsRes.json?.jobs || [];
+        const gateJob = jobs.find((job) => (job.name || '').toLowerCase().includes('gate'));
+        const deployJob = jobs.find((job) => {
+            const name = (job.name || '').toLowerCase();
+            return name.includes('deploy') && !name.includes('gate');
+        });
+
+        if (gateJob) {
+            const resultStep = (gateJob.steps || [])
+                .map((step) => parseResultStepName(step.name))
+                .find(Boolean);
+            const gateDone = gateJob.status === 'completed';
+            if (gateDone && resultStep) {
+                return { run: latest, jobs, resultStep, deployJob, gateJob };
+            }
+            if (gateDone && gateJob.conclusion === 'failure') {
+                throw new Error('The rate-limit check failed. See the Actions tab for details.');
+            }
+        }
+
+        if (latest.status === 'completed' && !deployJob) {
+            return {
+                run: latest,
+                jobs,
+                resultStep: { reason: 'busy', retryAfterSeconds: 30 },
+                deployJob,
+                gateJob
+            };
+        }
+
+        await new Promise((r) => setTimeout(r, 3000));
+    }
+    throw new Error('Timed out waiting for the Try it workflow to start.');
+}
+
+async function fetchDeployInfo() {
+    const res = await fetch(`deploy-info.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json();
+}
+
+function renderDeployStamp(info) {
+    const stamp = document.getElementById('header-deploy-stamp');
+    const timeEl = document.getElementById('header-deploy-time');
+    if (!stamp || !timeEl || !info?.deployedAt) return false;
+    const label = formatDeployStamp(info.deployedAt);
+    if (!label) return false;
+    timeEl.dateTime = info.deployedAt;
+    timeEl.textContent = label;
+    stamp.hidden = false;
+    stamp.title = info.runUrl ? `Workflow run ${info.runId || ''}`.trim() : 'Last GitHub Pages deploy';
+    syncHeaderHeight();
+    return true;
+}
+
+async function waitForDeployJob(config, runId) {
+    const deadline = Date.now() + 180000;
+    while (Date.now() < deadline) {
+        const jobsRes = await githubFetch(
+            `/repos/${config.owner}/${config.repo}/actions/runs/${runId}/jobs`,
+            config.token
+        );
+        const jobs = jobsRes.json?.jobs || [];
+        const deployJobs = jobs.filter((job) => {
+            const name = (job.name || '').toLowerCase();
+            return name.includes('deploy') && !name.includes('gate');
+        });
+        if (deployJobs.length) {
+            const unfinished = deployJobs.some((job) => job.status !== 'completed');
+            if (!unfinished) {
+                const failed = deployJobs.find((job) => job.conclusion !== 'success');
+                if (failed) {
+                    throw new Error('The GitHub Pages deploy job did not succeed. Check the Actions tab.');
+                }
+                return;
+            }
+        }
+        await new Promise((r) => setTimeout(r, 4000));
+    }
+}
+
+async function waitForNewDeploy(previousIso) {
+    const deadline = Date.now() + 180000;
+    while (Date.now() < deadline) {
+        const info = await fetchDeployInfo();
+        if (info?.deployedAt && info.deployedAt !== previousIso) {
+            renderDeployStamp(info);
+            return info;
+        }
+        await new Promise((r) => setTimeout(r, 4000));
+    }
+    return null;
+}
+
+function setTryItBusy(button, busy, label) {
+    if (!button) return;
+    button.disabled = busy;
+    button.setAttribute('aria-busy', busy ? 'true' : 'false');
+    button.textContent = label;
+}
+
+async function onTryItClick(button) {
+    const config = tryItConfig();
+    if (!config?.enabled || !config.token) {
+        showSiteMessage(
+            'Try it is not armed yet. Add a TRY_IT_DISPATCH_TOKEN Actions secret (see README) and redeploy.',
+            'is-error'
+        );
+        return;
+    }
+
+    const local = localRateDecision();
+    if (!local.allowed) {
+        showSiteMessage(
+            rateLimitMessage(local.reason, local.retryAfterSeconds, local.remainingToday),
+            'is-error'
+        );
+        return;
+    }
+
+    const previous = await fetchDeployInfo();
+    const previousIso = previous?.deployedAt || '';
+    setTryItBusy(button, true, 'Starting…');
+    showSiteMessage('Checking rate limits and starting a GitHub Pages deploy…', 'is-pending');
+
+    try {
+        const ip = await lookupVisitorIp();
+        const visitorKey = await sha256Hex(`${ip}|${config.owner}/${config.repo}`);
+        const requestId = newRequestId();
+        await dispatchTryIt(config, requestId, visitorKey);
+        showSiteMessage('Request accepted. Waiting for the Actions gate…', 'is-pending');
+
+        const run = await findTryItRun(config, requestId);
+        setTryItBusy(button, true, 'Deploying…');
+        const gate = await waitForGateResult(config, run);
+        const reason = gate.resultStep?.reason || 'unknown';
+
+        if (reason !== 'accepted') {
+            showSiteMessage(
+                rateLimitMessage(
+                    reason,
+                    gate.resultStep.retryAfterSeconds,
+                    gate.resultStep.remainingToday
+                ),
+                'is-error'
+            );
+            setTryItBusy(button, false, 'Try it');
+            return;
+        }
+
+        rememberLocalSuccess();
+        showSiteMessage(
+            'Deploy started. GitHub Pages usually takes 1–2 minutes. The header timestamp will update when it is live.',
+            'is-pending'
+        );
+
+        if (gate.deployJob || gate.run) {
+            await waitForDeployJob(config, gate.run.id);
+        }
+
+        const updated = await waitForNewDeploy(previousIso);
+        if (updated) {
+            showSiteMessage(
+                `Live on GitHub Pages. Header now shows ${formatDeployStamp(updated.deployedAt)}.`,
+                'is-success'
+            );
+        } else {
+            showSiteMessage(
+                'Deploy was triggered. If the header stamp has not changed yet, wait a moment and refresh.',
+                'is-pending'
+            );
+        }
+    } catch (err) {
+        showSiteMessage(err.message || 'Could not start a deploy.', 'is-error');
+    } finally {
+        const blocked = localRateDecision();
+        if (!blocked.allowed) {
+            setTryItBusy(button, true, 'Try it');
+            window.setTimeout(() => setTryItBusy(button, false, 'Try it'), blocked.retryAfterSeconds * 1000);
+        } else {
+            setTryItBusy(button, false, 'Try it');
+        }
+    }
+}
+
+function initTryIt() {
+    const button = document.getElementById('try-it-btn');
+    if (!button) return;
+    const blocked = localRateDecision();
+    if (!blocked.allowed) {
+        setTryItBusy(button, true, 'Try it');
+        window.setTimeout(() => setTryItBusy(button, false, 'Try it'), blocked.retryAfterSeconds * 1000);
+    }
+    button.addEventListener('click', () => {
+        if (button.disabled) return;
+        onTryItClick(button);
+    });
+}
+
+async function initDeployStamp() {
+    try {
+        const info = await fetchDeployInfo();
+        renderDeployStamp(info);
+    } catch {
+        /* local / first build without stamp */
+    }
+    syncHeaderHeight();
+}
+
+initTryIt();
+initDeployStamp();
+window.addEventListener('resize', syncHeaderHeight);
 
 // Fixed header: match portfolio (opaque bar + shadow after scroll)
 (function initHeaderScroll() {

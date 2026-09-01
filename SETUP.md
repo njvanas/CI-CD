@@ -39,7 +39,17 @@ After forking, you can customize:
 - **Functionality**: Update `script.js` to add new features
 - **Branding**: Change the logo, title, and footer text
 
-Every time you push changes, GitHub Actions will automatically deploy the updated site!
+Every time you push changes, GitHub Actions will automatically deploy the updated site.
+
+## 🧪 Enable the Try it button
+
+The public **Try it** button starts a real GitHub Pages deploy. After forking:
+
+1. Create a fine-grained PAT with **Actions: Read and write** on **only this repository**
+2. Add it as the Actions secret `TRY_IT_DISPATCH_TOKEN`
+3. Re-run the deploy workflow
+
+Limits: one deploy per IP every 5 minutes, max 5 per IP per UTC day.
 
 ## 🔧 Troubleshooting
 

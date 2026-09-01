@@ -19,6 +19,10 @@
                     <a href="https://njvanas.github.io/" class="site-header__name" title="NJ van As — portfolio home">NJ van As</a>
                     <span class="site-header__sep" aria-hidden="true">·</span>
                     <span class="site-header__page">CI/CD</span>
+                    <span id="header-deploy-stamp" class="site-header__deploy" hidden>
+                        <span class="site-header__deploy-label">Deployed</span>
+                        <time id="header-deploy-time" datetime=""></time>
+                    </span>
                 </div>
                 <ul class="nav-links">
                     <li><a href="#cicd">CI/CD</a></li>
@@ -36,12 +40,12 @@
                 <h1 class="hero__title">GitHub Pages CI/CD</h1>
                 <h2 class="hero__subtitle">Companion demo · automated deploy on every push</h2>
                 <p class="hero__lead">This page is hosted alongside <a class="inline-link" href="https://njvanas.github.io/">njvanas.github.io</a> and deploys automatically with GitHub Actions.</p>
-                <p class="hero-sub">Scroll down to see how commits flow from push to live site.</p>
+                <p class="hero-sub">Click Try it to trigger a real GitHub Pages deploy. The timestamp in the header updates when the new build goes live.</p>
                 <div class="hero__actions">
-                    <button type="button" class="btn btn--primary" onclick="showMessage()">Try it</button>
+                    <button type="button" id="try-it-btn" class="btn btn--primary">Try it</button>
                     <a class="btn btn--outline" href="#cicd">View pipeline</a>
                 </div>
-                <p id="message" class="hidden"></p>
+                <p id="message" class="hidden" role="status" aria-live="polite"></p>
             </div>
         </section>
 
@@ -150,7 +154,8 @@
                 </div>
                 <div class="about__body">
                     <p>This is a demonstration website showcasing automated deployment to GitHub Pages using GitHub Actions.</p>
-                    <p>Every time you push changes to the main branch, GitHub Actions will automatically build and deploy your site.</p>
+                    <p>Every push to the main branch deploys automatically. The Try it button on this page does the same thing: it starts a real Actions run, GitHub Pages is published again, and the header shows the new deploy date and time so you can see that it worked.</p>
+                    <p>To keep the pipeline from being overwhelmed, the same visitor IP can trigger Try it once every 5 minutes, up to 5 times per UTC day.</p>
                 </div>
             </div>
         </section>
@@ -241,6 +246,7 @@
         </div>
     </div>
 
+    <script src="try-it-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

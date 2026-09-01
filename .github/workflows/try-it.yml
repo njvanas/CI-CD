@@ -1,0 +1,58 @@
+name: Try It deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Client request id used to match this run from the site
+        required: true
+        type: string
+      visitor_key:
+        description: SHA-256 of the visitor IP (never send a raw IP)
+        required: true
+        type: string
+
+run-name: try-it ${{ inputs.request_id }}
+
+permissions: {}
+
+jobs:
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    concurrency:
+      group: try-it-gate
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      allowed: ${{ steps.check.outputs.allowed }}
+      reason: ${{ steps.check.outputs.reason }}
+      summary: ${{ steps.check.outputs.summary }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check rate limits
+        id: check
+        env:
+          VISITOR_KEY: ${{ inputs.visitor_key }}
+          REQUEST_ID: ${{ inputs.request_id }}
+        run: node scripts/try-it-gate.mjs
+
+      - name: try-it-result ${{ steps.check.outputs.summary }}
+        run: echo "${{ steps.check.outputs.reason }}"
+
+  deploy:
+    name: deploy
+    needs: gate
+    if: needs.gate.outputs.allowed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    secrets: inherit
+    uses: ./.github/workflows/deploy.yml
+    with:
+      source: try-it
