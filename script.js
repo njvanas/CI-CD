@@ -117,7 +117,7 @@ async function proxyFetch(path, { method = 'GET', token, body } = {}) {
 }
 
 async function fetchDeployInfo() {
-    const res = await fetch(`deploy-info.json?t=${Date.now()}`, { cache: 'no-store' });
+    const res = await fetch(`pages-deploy.json?t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return res.json();
 }

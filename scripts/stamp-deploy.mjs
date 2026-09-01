@@ -30,9 +30,9 @@ for (const file of ['index.html', 'script.js', 'styles.css']) {
 }
 cpSync('icons', `${distDir}/icons`, { recursive: true });
 
-writeFileSync(`${distDir}/deploy-info.json`, `${JSON.stringify(deployInfo, null, 2)}\n`);
+writeFileSync(`${distDir}/pages-deploy.json`, `${JSON.stringify(deployInfo, null, 2)}\n`);
 writeFileSync(
-  `${distDir}/try-it-config.js`,
+  `${distDir}/pages-config.js`,
   `window.__TRY_IT_CONFIG__=${JSON.stringify(config)};\n`
 );
 writeFileSync(`${distDir}/.nojekyll`, '');

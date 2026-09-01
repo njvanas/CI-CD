@@ -29,13 +29,13 @@ describe('stamp-deploy', () => {
 
     const dist = join(cwd, 'dist');
     assert.ok(existsSync(join(dist, 'index.html')));
-    assert.ok(existsSync(join(dist, 'try-it-config.js')));
-    assert.ok(existsSync(join(dist, 'deploy-info.json')));
+    assert.ok(existsSync(join(dist, 'pages-config.js')));
+    assert.ok(existsSync(join(dist, 'pages-deploy.json')));
     assert.ok(existsSync(join(dist, '.nojekyll')));
     assert.equal(existsSync(join(dist, 'scripts')), false);
 
     const config = JSON.parse(
-      readFileSync(join(dist, 'try-it-config.js'), 'utf8')
+      readFileSync(join(dist, 'pages-config.js'), 'utf8')
         .replace(/^window\.__TRY_IT_CONFIG__=/, '')
         .replace(/;\s*$/, '')
     );
