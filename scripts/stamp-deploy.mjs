@@ -30,12 +30,16 @@ for (const file of ['index.html', 'script.js', 'styles.css']) {
 }
 cpSync('icons', `${distDir}/icons`, { recursive: true });
 
-writeFileSync(`${distDir}/pages-deploy.json`, `${JSON.stringify(deployInfo, null, 2)}\n`);
-writeFileSync(
-  `${distDir}/pages-config.js`,
-  `window.__TRY_IT_CONFIG__=${JSON.stringify(config)};\n`
-);
+const deployJson = `${JSON.stringify(deployInfo, null, 2)}\n`;
+const configJs = `window.__TRY_IT_CONFIG__=${JSON.stringify(config)};\n`;
+
+writeFileSync(`${distDir}/pages-deploy.json`, deployJson);
+writeFileSync(`${distDir}/pages-config.js`, configJs);
 writeFileSync(`${distDir}/.nojekyll`, '');
+
+/** Also write at repo root so legacy branch-based Pages serves them. */
+writeFileSync('pages-deploy.json', deployJson);
+writeFileSync('pages-config.js', configJs);
 
 console.log(
   `Built ${distDir}/ source=${source} deployedAt=${deployedAt} tryItProxy=${proxyUrl || '(not set)'}`

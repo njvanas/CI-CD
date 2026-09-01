@@ -16,6 +16,8 @@ This repository is designed to work automatically when forked to your own GitHub
 4. Under "Source", select **GitHub Actions**
 5. Click **Save**
 
+> **Important:** If Pages is still set to "Deploy from a branch", generated files such as `pages-config.js` and `pages-deploy.json` will not appear on the live site. Either switch to **GitHub Actions** (recommended) or rely on the deploy workflow, which commits those files to the branch after each build.
+
 ### Step 3: Wait for Deployment
 1. Go to the **Actions** tab in your repository
 2. You should see a workflow run automatically (or trigger it manually)
