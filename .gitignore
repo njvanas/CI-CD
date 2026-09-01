@@ -25,11 +25,3 @@ dist/
 build/
 *.min.js
 *.min.css
-
-# Environment variables
-.env
-.env.local
-
-# Generated at deploy time for GitHub Pages
-try-it-config.js
-deploy-info.json
