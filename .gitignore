@@ -20,8 +20,7 @@ workers/try-it-proxy/node_modules/
 package-lock.json
 workers/try-it-proxy/package-lock.json
 
-# Build outputs
-dist/
-build/
+# Build outputs (generated in CI only — do not commit)
+/build/
 *.min.js
 *.min.css
