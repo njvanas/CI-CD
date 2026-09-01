@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { describe, it } from 'node:test';
 
 describe('stamp-deploy', () => {
-  it('writes deploy-info.json and a config file without a token', () => {
+  it('writes deploy-info.json and a public proxy config without secrets', () => {
     const cwd = mkdtempSync(join(tmpdir(), 'stamp-deploy-'));
     const result = spawnSync(process.execPath, [join(process.cwd(), 'scripts/stamp-deploy.mjs')], {
       cwd,
@@ -15,8 +15,7 @@ describe('stamp-deploy', () => {
         DEPLOY_SOURCE: 'try-it',
         GITHUB_RUN_ID: '99',
         GITHUB_REPOSITORY: 'njvanas/CI-CD',
-        GITHUB_REF_NAME: 'master',
-        TRY_IT_TOKEN: ''
+        TRY_IT_PROXY_URL: 'https://try-it.example.workers.dev'
       },
       encoding: 'utf8'
     });
@@ -27,9 +26,9 @@ describe('stamp-deploy', () => {
     assert.ok(info.deployedAt);
     const configJs = readFileSync(join(cwd, 'try-it-config.js'), 'utf8');
     const config = JSON.parse(configJs.replace(/^window\.__TRY_IT_CONFIG__=/, '').replace(/;\s*$/, ''));
-    assert.equal(config.enabled, false);
-    assert.equal(config.owner, 'njvanas');
-    assert.equal(config.repo, 'CI-CD');
-    assert.equal(config.workflow, 'try-it.yml');
+    assert.equal(config.enabled, true);
+    assert.equal(config.proxyUrl, 'https://try-it.example.workers.dev');
+    assert.equal('token' in config, false);
+    assert.equal('password' in config, false);
   });
 });

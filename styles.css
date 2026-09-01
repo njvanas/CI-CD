@@ -781,6 +781,56 @@ main {
     margin-top: 1.25rem;
 }
 
+.modal-content--auth {
+    max-width: 28rem;
+}
+
+.try-it-auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.try-it-auth-form__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-gray-300);
+}
+
+.try-it-auth-form__input {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-strong);
+    background: rgba(15, 23, 42, 0.85);
+    color: #fff;
+    font: inherit;
+}
+
+.try-it-auth-form__input:focus {
+    outline: 2px solid var(--accent-ring);
+    outline-offset: 2px;
+}
+
+.try-it-auth-form__error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #fca5a5;
+}
+
+.try-it-auth-form__error.hidden {
+    display: none;
+}
+
+.try-it-auth-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+}
+
 .modal-result strong {
     color: #86efac;
     display: block;

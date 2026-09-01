@@ -43,11 +43,12 @@ Every time you push changes, GitHub Actions will automatically deploy the update
 
 ## 🧪 Enable the Try it button
 
-The public **Try it** button starts a real GitHub Pages deploy. After forking:
+Try it uses a **private Cloudflare Worker** — no API keys or passwords are published on GitHub Pages.
 
-1. Create a fine-grained PAT with **Actions: Read and write** on **only this repository**
-2. Add it as the Actions secret `TRY_IT_DISPATCH_TOKEN`
-3. Re-run the deploy workflow
+1. Deploy the Worker (`workers/try-it-proxy`) — see **[WORKER.md](WORKER.md)**
+2. Set Actions variable `TRY_IT_PROXY_URL` to your Worker URL
+3. Re-run the Pages deploy workflow
+4. Share the demo password privately
 
 Limits: one deploy per IP every 5 minutes, max 5 per IP per UTC day.
 

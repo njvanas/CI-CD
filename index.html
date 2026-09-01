@@ -40,7 +40,7 @@
                 <h1 class="hero__title">GitHub Pages CI/CD</h1>
                 <h2 class="hero__subtitle">Companion demo · automated deploy on every push</h2>
                 <p class="hero__lead">This page is hosted alongside <a class="inline-link" href="https://njvanas.github.io/">njvanas.github.io</a> and deploys automatically with GitHub Actions.</p>
-                <p class="hero-sub">Click Try it to trigger a real GitHub Pages deploy. The timestamp in the header updates when the new build goes live.</p>
+                <p class="hero-sub">Try it is password-protected. After you unlock it, a private proxy starts a real GitHub Pages deploy and the header timestamp updates when the build goes live.</p>
                 <div class="hero__actions">
                     <button type="button" id="try-it-btn" class="btn btn--primary">Try it</button>
                     <a class="btn btn--outline" href="#cicd">View pipeline</a>
@@ -154,8 +154,8 @@
                 </div>
                 <div class="about__body">
                     <p>This is a demonstration website showcasing automated deployment to GitHub Pages using GitHub Actions.</p>
-                    <p>Every push to the main branch deploys automatically. The Try it button on this page does the same thing: it starts a real Actions run, GitHub Pages is published again, and the header shows the new deploy date and time so you can see that it worked.</p>
-                    <p>To keep the pipeline from being overwhelmed, the same visitor IP can trigger Try it once every 5 minutes, up to 5 times per UTC day.</p>
+                    <p>Every push to the main branch deploys automatically. The Try it button does the same thing, but only after you enter the demo password — credentials and GitHub tokens never live in this public page.</p>
+                    <p>A private Cloudflare Worker verifies the password, enforces rate limits (once every 5 minutes, up to 5 times per UTC day per IP), and triggers GitHub Actions. The header shows the new deploy date and time when Pages finishes publishing.</p>
                 </div>
             </div>
         </section>
@@ -225,7 +225,7 @@
         </div>
     </footer>
 
-    <!-- Modal Popup -->
+    <!-- Pipeline step modal -->
     <div id="step-modal" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
@@ -242,6 +242,29 @@
                 <div class="modal-result">
                     <strong>Result:</strong> <span id="modal-result"></span>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Try it password gate (no secrets stored in the page) -->
+    <div id="try-it-auth-modal" class="modal" aria-hidden="true" aria-labelledby="try-it-auth-title">
+        <div class="modal-content modal-content--auth">
+            <span class="modal-close" id="try-it-auth-close" aria-label="Close">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon" aria-hidden="true">🔐</div>
+                <h2 id="try-it-auth-title">Unlock Try it</h2>
+            </div>
+            <div class="modal-body">
+                <p>Enter the demo password to trigger a real GitHub Pages deploy. Your password is sent over HTTPS to the private proxy only — it is not saved in this site, and no API keys are embedded in the page.</p>
+                <form id="try-it-auth-form" class="try-it-auth-form">
+                    <label class="try-it-auth-form__label" for="try-it-password">Demo password</label>
+                    <input class="try-it-auth-form__input" type="password" id="try-it-password" name="password" autocomplete="current-password" required />
+                    <p id="try-it-auth-error" class="try-it-auth-form__error hidden" role="alert"></p>
+                    <div class="try-it-auth-form__actions">
+                        <button type="button" class="btn btn--outline" id="try-it-auth-cancel">Cancel</button>
+                        <button type="submit" class="btn btn--primary">Unlock</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

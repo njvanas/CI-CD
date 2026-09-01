@@ -96,30 +96,27 @@ https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
 
 The workflow file (`.github/workflows/deploy.yml`) handles everything automatically.
 
-## 🧪 Try it button
+## 🧪 Try it button (password-protected)
 
-The live site can trigger another GitHub Pages deploy without a git push:
+The live site can trigger another GitHub Pages deploy without a git push — **without exposing any API keys on the public page**.
 
-1. Visitor clicks **Try it**
-2. The page looks up their IP, hashes it, and starts `.github/workflows/try-it.yml`
-3. A gate job enforces **5 minutes between deploys** and **5 deploys per IP per UTC day** (plus a global safety cap of 100 Try it deploys per day, and only one Pages deploy at a time)
-4. If allowed, the same Pages deploy workflow runs again and writes a new timestamp into the header
+1. Visitor clicks **Try it** and enters the demo password
+2. The browser calls your private **Cloudflare Worker** proxy (HTTPS only)
+3. The Worker verifies the password, applies IP rate limits, and dispatches `.github/workflows/try-it.yml`
+4. GitHub Actions runs a second gate, deploys to Pages, and updates the header timestamp
 
-### Arm Try it (required once)
+### Setup (required once)
 
-GitHub Pages is static, so the button needs a tightly scoped token baked into the published site at deploy time.
+Follow **[WORKER.md](WORKER.md)** — summary:
 
-1. Create a **fine-grained personal access token**
-   - Resource owner: your account
-   - Repository access: **only this repository**
-   - Repository permissions: **Actions: Read and write** (nothing else)
-2. In the repository go to **Settings → Secrets and variables → Actions**
-3. Add a secret named `TRY_IT_DISPATCH_TOKEN` with that token
-4. Re-run **Deploy to GitHub Pages** (or push any change)
+1. Deploy `workers/try-it-proxy` to Cloudflare (Worker secrets hold the GitHub token and password hash)
+2. Set repository variable `TRY_IT_PROXY_URL` to the Worker URL (not a secret)
+3. Re-run **Deploy to GitHub Pages**
+4. Share the demo password privately with people who should use Try it
 
-Until that secret exists, the button shows a setup message instead of starting a deploy.
+Until the proxy is configured, Try it shows a setup message. **Never** put tokens or passwords in the GitHub Pages build.
 
-Hashed visitor keys (not raw IPs) are stored on a dedicated `try-it-state` branch so the gate can remember cooldowns without touching `master`.
+Limits: **5 minutes between deploys** and **5 per IP per UTC day** (enforced at the Worker and again in Actions).
 
 ## 📁 Project Structure
 
@@ -128,7 +125,9 @@ Hashed visitor keys (not raw IPs) are stored on a dedicated `try-it-state` branc
 ├── index.html          # Main HTML file
 ├── styles.css          # Stylesheet
 ├── script.js           # JavaScript functionality
-├── scripts/            # Deploy stamp + Try it rate-limit gate
+├── scripts/            # Deploy stamp, auth crypto, rate-limit gate
+├── workers/
+│   └── try-it-proxy/   # Password-protected Cloudflare Worker (see WORKER.md)
 ├── .github/
 │   └── workflows/
 │       ├── deploy.yml  # CI/CD workflow (works automatically!)
@@ -136,6 +135,7 @@ Hashed visitor keys (not raw IPs) are stored on a dedicated `try-it-state` branc
 │       └── test.yml    # Unit tests for rate-limit rules
 ├── .gitignore          # Git ignore rules
 ├── README.md           # This file
+├── WORKER.md           # Secure Try it proxy setup
 └── SETUP.md            # Detailed setup guide for forking
 ```
 
@@ -153,7 +153,7 @@ Hashed visitor keys (not raw IPs) are stored on a dedicated `try-it-state` branc
 - GitHub Pages is free for public repositories
 - Deployment typically takes 1-2 minutes after push
 - You can manually trigger deployment via Actions tab → "Deploy to GitHub Pages" → "Run workflow"
-- Try it also triggers a real Pages deploy, with per-IP rate limits so the queue cannot be spammed
+- Try it triggers a real Pages deploy through a **password-protected proxy** — see [WORKER.md](WORKER.md)
 
 ## 🔄 Forking This Repository
 

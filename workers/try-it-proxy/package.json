@@ -1,0 +1,12 @@
+{
+  "name": "cicd-try-it-proxy",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
