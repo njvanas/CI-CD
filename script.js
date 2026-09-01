@@ -445,28 +445,41 @@ async function onTryItClick(button) {
     } catch (err) {
         showSiteMessage(err.message || 'Could not start a deploy.', 'is-error');
     } finally {
-        const blocked = localRateDecision();
-        if (!blocked.allowed) {
-            setTryItBusy(button, true, 'Try it');
-            window.setTimeout(() => setTryItBusy(button, false, 'Try it'), blocked.retryAfterSeconds * 1000);
-        } else {
-            setTryItBusy(button, false, 'Try it');
-        }
+        applyTryItAvailability(button);
     }
 }
 
 function initTryIt() {
     const button = document.getElementById('try-it-btn');
     if (!button) return;
-    const blocked = localRateDecision();
-    if (!blocked.allowed) {
-        setTryItBusy(button, true, 'Try it');
-        window.setTimeout(() => setTryItBusy(button, false, 'Try it'), blocked.retryAfterSeconds * 1000);
-    }
+    applyTryItAvailability(button, { announce: true });
     button.addEventListener('click', () => {
         if (button.disabled) return;
         onTryItClick(button);
     });
+}
+
+function applyTryItAvailability(button, { announce = false } = {}) {
+    if (!button) return localRateDecision();
+    const blocked = localRateDecision();
+    if (!blocked.allowed) {
+        setTryItBusy(button, true, 'Try it');
+        button.title = rateLimitMessage(blocked.reason, blocked.retryAfterSeconds, blocked.remainingToday);
+        if (announce) {
+            showSiteMessage(
+                rateLimitMessage(blocked.reason, blocked.retryAfterSeconds, blocked.remainingToday),
+                'is-error'
+            );
+        }
+        if (blocked.reason === 'cooldown') {
+            const waitMs = Math.min(TRY_IT_COOLDOWN_MS + 1000, blocked.retryAfterSeconds * 1000);
+            window.setTimeout(() => applyTryItAvailability(button), waitMs);
+        }
+        return blocked;
+    }
+    button.removeAttribute('title');
+    setTryItBusy(button, false, 'Try it');
+    return blocked;
 }
 
 async function initDeployStamp() {
