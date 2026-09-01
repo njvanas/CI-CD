@@ -4,10 +4,11 @@ A modern website template with automated CI/CD deployment to GitHub Pages using 
 
 ## 🚀 Features
 
-- **Automated Deployment**: Every push to `main` branch automatically deploys to GitHub Pages
+- **Automated Deployment**: Every push to `main`/`master` automatically deploys to GitHub Pages
+- **Try it button**: Visitors can trigger a real GitHub Pages redeploy from the live site
+- **Deploy timestamp**: The header shows the date and time of the last Pages publish
+- **Rate limits**: Same IP can use Try it once every 5 minutes, up to 5 times per UTC day
 - **Modern UI**: Clean, responsive design with smooth animations
-- **CI/CD Pipeline**: GitHub Actions workflow handles the entire deployment process
-- **Zero Configuration**: Works out of the box after initial setup
 - **Fork-Ready**: Automatically detects your repository and works with any GitHub username
 
 ## 📋 Prerequisites
@@ -90,10 +91,32 @@ https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
 ## 🔄 How CI/CD Works
 
 1. **Push to main branch** → Triggers GitHub Actions workflow
-2. **Workflow runs** → Checks out code, prepares deployment
+2. **Workflow runs** → Checks out code, stamps the deploy time, prepares Pages
 3. **Deploys to GitHub Pages** → Your site is live automatically
 
 The workflow file (`.github/workflows/deploy.yml`) handles everything automatically.
+
+## 🧪 Try it button (password-protected)
+
+The live site can trigger another GitHub Pages deploy without a git push — **without exposing any API keys on the public page**.
+
+1. Visitor clicks **Try it** and enters the demo password
+2. The browser calls your private **Cloudflare Worker** proxy (HTTPS only)
+3. The Worker verifies the password, applies IP rate limits, and dispatches `.github/workflows/try-it.yml`
+4. GitHub Actions runs a second gate, deploys to Pages, and updates the header timestamp
+
+### Setup (required once)
+
+Follow **[WORKER.md](WORKER.md)** — summary:
+
+1. Deploy `workers/try-it-proxy` to Cloudflare (Worker secrets hold the GitHub token and password hash)
+2. Set repository variable `TRY_IT_PROXY_URL` to the Worker URL (not a secret)
+3. Re-run **Deploy to GitHub Pages**
+4. Share the demo password privately with people who should use Try it
+
+Until the proxy is configured, Try it shows a setup message. **Never** put tokens or passwords in the GitHub Pages build.
+
+Limits: **5 minutes between deploys** and **5 per IP per UTC day** (enforced at the Worker and again in Actions).
 
 ## 📁 Project Structure
 
@@ -102,11 +125,17 @@ The workflow file (`.github/workflows/deploy.yml`) handles everything automatica
 ├── index.html          # Main HTML file
 ├── styles.css          # Stylesheet
 ├── script.js           # JavaScript functionality
+├── scripts/            # Deploy stamp, auth crypto, rate-limit gate
+├── workers/
+│   └── try-it-proxy/   # Password-protected Cloudflare Worker (see WORKER.md)
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml  # CI/CD workflow (works automatically!)
+│       ├── deploy.yml  # CI/CD workflow (works automatically!)
+│       ├── try-it.yml  # Rate-limited deploy triggered by Try it
+│       └── test.yml    # Unit tests for rate-limit rules
 ├── .gitignore          # Git ignore rules
 ├── README.md           # This file
+├── WORKER.md           # Secure Try it proxy setup
 └── SETUP.md            # Detailed setup guide for forking
 ```
 
@@ -124,6 +153,7 @@ The workflow file (`.github/workflows/deploy.yml`) handles everything automatica
 - GitHub Pages is free for public repositories
 - Deployment typically takes 1-2 minutes after push
 - You can manually trigger deployment via Actions tab → "Deploy to GitHub Pages" → "Run workflow"
+- Try it triggers a real Pages deploy through a **password-protected proxy** — see [WORKER.md](WORKER.md)
 
 ## 🔄 Forking This Repository
 

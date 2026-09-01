@@ -16,7 +16,9 @@ npm-debug.log*
 
 # Dependencies (if you add Node.js later)
 node_modules/
+workers/try-it-proxy/node_modules/
 package-lock.json
+workers/try-it-proxy/package-lock.json
 
 # Build outputs
 dist/
@@ -27,3 +29,7 @@ build/
 # Environment variables
 .env
 .env.local
+
+# Generated at deploy time for GitHub Pages
+try-it-config.js
+deploy-info.json

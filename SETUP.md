@@ -39,7 +39,18 @@ After forking, you can customize:
 - **Functionality**: Update `script.js` to add new features
 - **Branding**: Change the logo, title, and footer text
 
-Every time you push changes, GitHub Actions will automatically deploy the updated site!
+Every time you push changes, GitHub Actions will automatically deploy the updated site.
+
+## 🧪 Enable the Try it button
+
+Try it uses a **private Cloudflare Worker** — no API keys or passwords are published on GitHub Pages.
+
+1. Deploy the Worker (`workers/try-it-proxy`) — see **[WORKER.md](WORKER.md)**
+2. Set Actions variable `TRY_IT_PROXY_URL` to your Worker URL
+3. Re-run the Pages deploy workflow
+4. Share the demo password privately
+
+Limits: one deploy per IP every 5 minutes, max 5 per IP per UTC day.
 
 ## 🔧 Troubleshooting
 
