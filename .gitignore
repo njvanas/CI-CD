@@ -22,5 +22,7 @@ workers/try-it-proxy/package-lock.json
 
 # Build outputs (generated in CI only — do not commit)
 /build/
+/pages-config.js
+/pages-deploy.json
 *.min.js
 *.min.css
