@@ -39,6 +39,8 @@ jobs:
         env:
           VISITOR_KEY: ${{ inputs.visitor_key }}
           REQUEST_ID: ${{ inputs.request_id }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: node scripts/try-it-gate.mjs
 
       - name: try-it-result ${{ steps.check.outputs.summary }}
