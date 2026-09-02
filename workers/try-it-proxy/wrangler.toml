@@ -22,8 +22,3 @@ ALLOWED_ORIGINS = "https://njvanas.github.io,http://127.0.0.1:8765,http://localh
 
 # Secrets (never commit):
 #   wrangler secret put GITHUB_TOKEN
-#   wrangler secret put JWT_SECRET
-#   wrangler secret put TRY_IT_PASSWORD_HASH
-#
-# Generate password hash:
-#   node scripts/hash-try-it-password.mjs "your-long-demo-password"

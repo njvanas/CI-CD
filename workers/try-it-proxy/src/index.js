@@ -2,10 +2,6 @@ import {
   evaluateRateLimit,
   resultSummary
 } from './rate-limit.mjs';
-import { signJwt, verifyJwt, verifyPassword } from './auth-crypto.mjs';
-
-const AUTH_MAX_ATTEMPTS = 10;
-const AUTH_WINDOW_MS = 15 * 60 * 1000;
 
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -20,7 +16,7 @@ function corsHeaders(origin, env) {
   return {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
     Vary: 'Origin'
   };
@@ -44,14 +40,6 @@ async function sha256Hex(text) {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function readJson(request) {
-  try {
-    return await request.json();
-  } catch {
-    return null;
-  }
-}
-
 async function kvGetJson(kv, key) {
   const raw = await kv.get(key);
   if (!raw) return null;
@@ -64,11 +52,6 @@ async function kvGetJson(kv, key) {
 
 async function kvPutJson(kv, key, value, ttlSec) {
   await kv.put(key, JSON.stringify(value), ttlSec ? { expirationTtl: ttlSec } : undefined);
-}
-
-async function loadRateState(kv) {
-  const global = (await kvGetJson(kv, 'rl:global')) || { day: '', count: 0 };
-  return { global, visitors: {} };
 }
 
 async function loadVisitorEntry(kv, visitorKey, day) {
@@ -105,37 +88,13 @@ async function evaluateVisitorLimit(kv, visitorKey, now = new Date()) {
   return evaluateRateLimit(merged, global, now);
 }
 
-async function authAttemptAllowed(kv, ipHash) {
-  const key = `auth:${ipHash}`;
-  const state = (await kvGetJson(kv, key)) || { count: 0, windowStart: Date.now() };
-  const now = Date.now();
-  if (now - state.windowStart > AUTH_WINDOW_MS) {
-    await kvPutJson(kv, key, { count: 1, windowStart: now }, Math.ceil(AUTH_WINDOW_MS / 1000));
-    return true;
-  }
-  if (state.count >= AUTH_MAX_ATTEMPTS) return false;
-  await kvPutJson(
-    kv,
-    key,
-    { count: state.count + 1, windowStart: state.windowStart },
-    Math.ceil((AUTH_WINDOW_MS - (now - state.windowStart)) / 1000)
-  );
-  return true;
-}
-
-async function bearerPayload(request, env) {
-  const header = request.headers.get('Authorization') || '';
-  const match = header.match(/^Bearer\s+(.+)$/i);
-  if (!match) return null;
-  return verifyJwt(match[1].trim(), env.JWT_SECRET);
-}
-
 async function githubFetch(env, path, options = {}) {
   const res = await fetch(`https://api.github.com${path}`, {
     ...options,
     headers: {
       Accept: 'application/vnd.github+json',
       Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+      'User-Agent': 'cicd-try-it-proxy',
       'X-GitHub-Api-Version': '2022-11-28',
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
       ...(options.headers || {})
@@ -226,28 +185,7 @@ async function gateStatusForRun(env, runId) {
   };
 }
 
-async function handleAuth(request, env, ipHash) {
-  if (!(await authAttemptAllowed(env.RATE_LIMITS, ipHash))) {
-    return json({ error: 'too_many_attempts', message: 'Too many login attempts. Try again later.' }, 429);
-  }
-  const body = await readJson(request);
-  const password = String(body?.password || '');
-  if (!password) return json({ error: 'invalid_request', message: 'Password required.' }, 400);
-  const ok = await verifyPassword(password, env.TRY_IT_PASSWORD_HASH);
-  if (!ok) {
-    return json({ error: 'unauthorized', message: 'Invalid credentials.' }, 401);
-  }
-  const token = await signJwt({ sub: 'try-it', ip: ipHash }, env.JWT_SECRET);
-  return json({ token, expiresIn: 30 * 60 });
-}
-
-async function handleDeploy(request, env, ipHash) {
-  const payload = await bearerPayload(request, env);
-  if (!payload) return json({ error: 'unauthorized', message: 'Session expired. Sign in again.' }, 401);
-  if (payload.ip && payload.ip !== ipHash) {
-    return json({ error: 'unauthorized', message: 'Session is not valid for this network.' }, 401);
-  }
-
+async function handleDeploy(env, ipHash) {
   const repo = `${repoConfig(env).owner}/${repoConfig(env).repo}`;
   const visitorKey = await sha256Hex(`${ipHash}|${repo}`);
 
@@ -290,15 +228,11 @@ async function handleDeploy(request, env, ipHash) {
   return json({ allowed: true, requestId, reason: 'accepted', phase: 'queued' });
 }
 
-async function handleStatus(request, env, requestId) {
-  const payload = await bearerPayload(request, env);
-  if (!payload) return json({ error: 'unauthorized', message: 'Session expired. Sign in again.' }, 401);
-
+async function handleStatus(env, requestId) {
   const run = await findRunByRequestId(env, requestId);
   if (!run) return json({ requestId, phase: 'queued' });
 
   const gate = await gateStatusForRun(env, run.id);
-  const { owner, repo } = repoConfig(env);
   return json({
     requestId,
     runId: run.id,
@@ -325,13 +259,12 @@ export default {
     let response;
     if (url.pathname === '/api/health' && request.method === 'GET') {
       response = json({ ok: true });
-    } else if (url.pathname === '/api/auth' && request.method === 'POST') {
-      response = await handleAuth(request, env, ipHash);
     } else if (url.pathname === '/api/deploy' && request.method === 'POST') {
-      response = await handleDeploy(request, env, ipHash);
+      if (!cors) response = json({ error: 'forbidden' }, 403);
+      else response = await handleDeploy(env, ipHash);
     } else if (url.pathname.startsWith('/api/deploy/') && url.pathname.endsWith('/status') && request.method === 'GET') {
-      const requestId = url.pathname.split('/')[3];
-      response = await handleStatus(request, env, requestId);
+      if (!cors) response = json({ error: 'forbidden' }, 403);
+      else response = await handleStatus(env, url.pathname.split('/')[3]);
     } else {
       response = json({ error: 'not_found' }, 404);
     }
