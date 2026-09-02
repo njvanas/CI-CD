@@ -44,23 +44,17 @@ function showSiteMessage(text, variant = '') {
     messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function rateLimitMessage(reason, retryAfterSeconds, remainingToday) {
+function rateLimitMessage(reason, retryAfterSeconds) {
     if (reason === 'cooldown') {
-        return `Please wait ${formatDuration(retryAfterSeconds)} before triggering another deploy from this network.`;
+        return `Please wait ${formatDuration(retryAfterSeconds)} and try again.`;
     }
-    if (reason === 'daily_limit') {
-        return `This network has used all 5 Try it deploys for today. Try again in ${formatDuration(retryAfterSeconds)}.`;
+    if (reason === 'daily_limit' || reason === 'global_limit') {
+        return `Please try again in ${formatDuration(retryAfterSeconds)}.`;
     }
     if (reason === 'busy') {
-        return `A deploy is already running. Try again in about ${formatDuration(retryAfterSeconds || 30)}.`;
+        return `Please wait about ${formatDuration(retryAfterSeconds || 30)} and try again.`;
     }
-    if (reason === 'global_limit') {
-        return `Try it has reached today's safety cap. Please come back in ${formatDuration(retryAfterSeconds)}.`;
-    }
-    if (remainingToday != null) {
-        return `Deploy was not started (${reason}). ${remainingToday} Try it ${remainingToday === 1 ? 'use' : 'uses'} left today.`;
-    }
-    return 'Deploy was not started. Please try again later.';
+    return 'Please try again later.';
 }
 
 function readSession() {
@@ -90,7 +84,7 @@ function clearSession() {
 
 async function proxyFetch(path, { method = 'GET', token, body } = {}) {
     const config = tryItConfig();
-    if (!config?.proxyUrl) throw new Error('Try it proxy is not configured.');
+    if (!config?.proxyUrl) throw new Error('Try it is unavailable.');
     const headers = { Accept: 'application/json' };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -103,7 +97,7 @@ async function proxyFetch(path, { method = 'GET', token, body } = {}) {
             body: body !== undefined ? JSON.stringify(body) : undefined
         });
     } catch {
-        throw new Error('Could not reach the Try it proxy. Check your connection or proxy URL.');
+        throw new Error('Could not connect. Please try again.');
     }
 
     const text = await res.text();
@@ -266,7 +260,7 @@ async function pollDeployStatus(token, requestId) {
         const result = await proxyFetch(`/api/deploy/${encodeURIComponent(requestId)}/status`, { token });
         if (result.status === 401) {
             clearSession();
-            throw new Error('Session expired. Click Try it again and re-enter the password.');
+            throw new Error('Please try again.');
         }
         if (!result.ok || !result.data) {
             await new Promise((r) => setTimeout(r, 3000));
@@ -280,20 +274,17 @@ async function pollDeployStatus(token, requestId) {
             return data;
         }
         if (data.runStatus === 'completed' && data.runConclusion === 'failure') {
-            throw new Error('The deploy workflow did not succeed. Check GitHub Actions.');
+            throw new Error('Something went wrong. Please try again.');
         }
         await new Promise((r) => setTimeout(r, 3000));
     }
-    throw new Error('Timed out waiting for the deploy workflow.');
+    throw new Error('This is taking longer than expected. Refresh in a moment.');
 }
 
 async function onTryItClick(button) {
     const config = tryItConfig();
     if (!config?.enabled || !config?.proxyUrl) {
-        showSiteMessage(
-            'Try it is not configured yet. Deploy the password-protected proxy and set the TRY_IT_PROXY_URL repository variable (see WORKER.md).',
-            'is-error'
-        );
+        showSiteMessage('Try it is unavailable.', 'is-error');
         return;
     }
 
@@ -301,65 +292,52 @@ async function onTryItClick(button) {
     const previousIso = previous?.deployedAt || '';
 
     try {
-        setTryItBusy(button, true, 'Unlocking…');
+        setTryItBusy(button, true, '…');
         const token = await ensureSessionToken();
         if (!token) return;
 
         setTryItBusy(button, true, 'Starting…');
-        showSiteMessage('Checking rate limits and starting a GitHub Pages deploy…', 'is-pending');
+        showSiteMessage('Starting…', 'is-pending');
 
         const deployRes = await proxyFetch('/api/deploy', { method: 'POST', token });
         if (deployRes.status === 401) {
             clearSession();
-            throw new Error('Session expired. Click Try it again and re-enter the password.');
+            throw new Error('Please try again.');
         }
         if (deployRes.status === 429 && deployRes.data?.allowed === false) {
             showSiteMessage(
-                rateLimitMessage(
-                    deployRes.data.reason,
-                    deployRes.data.retryAfterSeconds,
-                    deployRes.data.remainingToday
-                ),
+                rateLimitMessage(deployRes.data.reason, deployRes.data.retryAfterSeconds),
                 'is-error'
             );
             return;
         }
         if (!deployRes.ok || !deployRes.data?.allowed) {
-            throw new Error(deployRes.data?.message || deployRes.data?.detail || 'Could not start a deploy.');
+            throw new Error('Please try again later.');
         }
 
         setTryItBusy(button, true, 'Deploying…');
-        showSiteMessage('Request accepted. Waiting for GitHub Actions…', 'is-pending');
+        showSiteMessage('Working…', 'is-pending');
 
         const status = await pollDeployStatus(token, deployRes.data.requestId);
         if (status.phase === 'rejected' && status.reason !== 'accepted') {
             showSiteMessage(
-                rateLimitMessage(status.reason, status.retryAfterSeconds, status.remainingToday),
+                rateLimitMessage(status.reason, status.retryAfterSeconds),
                 'is-error'
             );
             return;
         }
 
-        showSiteMessage(
-            'Deploy started. GitHub Pages usually takes 1–2 minutes. The header timestamp will update when it is live.',
-            'is-pending'
-        );
+        showSiteMessage('Working…', 'is-pending');
 
         const updated = await waitForNewDeploy(previousIso);
         if (updated) {
-            showSiteMessage(
-                `Live on GitHub Pages. Header now shows ${formatDeployStamp(updated.deployedAt)}.`,
-                'is-success'
-            );
+            showSiteMessage('Done.', 'is-success');
         } else {
-            showSiteMessage(
-                'Deploy was triggered. If the header stamp has not changed yet, wait a moment and refresh.',
-                'is-pending'
-            );
+            showSiteMessage('Refresh in a moment.', 'is-pending');
         }
     } catch (err) {
         if (err.message !== 'cancelled') {
-            showSiteMessage(err.message || 'Could not start a deploy.', 'is-error');
+            showSiteMessage(err.message || 'Please try again.', 'is-error');
         }
     } finally {
         setTryItBusy(button, false, 'Try it');
