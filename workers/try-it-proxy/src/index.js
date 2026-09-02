@@ -1,8 +1,8 @@
 import {
   evaluateRateLimit,
   resultSummary
-} from '../../scripts/rate-limit.mjs';
-import { signJwt, verifyJwt, verifyPassword } from '../../scripts/auth-crypto.mjs';
+} from './rate-limit.mjs';
+import { signJwt, verifyJwt, verifyPassword } from './auth-crypto.mjs';
 
 const AUTH_MAX_ATTEMPTS = 10;
 const AUTH_WINDOW_MS = 15 * 60 * 1000;
