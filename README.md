@@ -96,25 +96,24 @@ https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
 
 The workflow file (`.github/workflows/deploy.yml`) handles everything automatically.
 
-## 🧪 Try it button (password-protected)
+## 🧪 Try it button
 
-The live site can trigger another GitHub Pages deploy without a git push — **without exposing any API keys on the public page**.
+The live site can trigger another GitHub Pages deploy without a git push — **without exposing any API keys on the public page**. Anyone can click Try it.
 
-1. Visitor clicks **Try it** and enters the demo password
+1. Visitor clicks **Try it**
 2. The browser calls your private **Cloudflare Worker** proxy (HTTPS only)
-3. The Worker verifies the password, applies IP rate limits, and dispatches `.github/workflows/try-it.yml`
+3. The Worker applies IP rate limits and dispatches `.github/workflows/try-it.yml`
 4. GitHub Actions runs a second gate, deploys to Pages, and updates the header timestamp
 
 ### Setup (required once)
 
 Follow **[WORKER.md](WORKER.md)** — summary:
 
-1. Deploy `workers/try-it-proxy` to Cloudflare (Worker secrets hold the GitHub token and password hash)
+1. Deploy `workers/try-it-proxy` to Cloudflare (Worker secret holds the GitHub token)
 2. Set repository variable `TRY_IT_PROXY_URL` to the Worker URL (not a secret)
 3. Re-run **Deploy to GitHub Pages**
-4. Share the demo password privately with people who should use Try it
 
-Until the proxy is configured, Try it shows a setup message. **Never** put tokens or passwords in the GitHub Pages build.
+Until the proxy is configured, Try it shows a setup message. **Never** put tokens in the GitHub Pages build.
 
 Limits: **5 minutes between deploys** and **5 per IP per UTC day** (enforced at the Worker and again in Actions).
 
@@ -125,9 +124,9 @@ Limits: **5 minutes between deploys** and **5 per IP per UTC day** (enforced at 
 ├── index.html          # Main HTML file
 ├── styles.css          # Stylesheet
 ├── script.js           # JavaScript functionality
-├── scripts/            # Deploy stamp, auth crypto, rate-limit gate
+├── scripts/            # Deploy stamp, rate-limit gate
 ├── workers/
-│   └── try-it-proxy/   # Password-protected Cloudflare Worker (see WORKER.md)
+│   └── try-it-proxy/   # Rate-limited Cloudflare Worker (see WORKER.md)
 ├── .github/
 │   └── workflows/
 │       ├── deploy.yml  # CI/CD workflow (works automatically!)
@@ -153,7 +152,7 @@ Limits: **5 minutes between deploys** and **5 per IP per UTC day** (enforced at 
 - GitHub Pages is free for public repositories
 - Deployment typically takes 1-2 minutes after push
 - You can manually trigger deployment via Actions tab → "Deploy to GitHub Pages" → "Run workflow"
-- Try it triggers a real Pages deploy through a **password-protected proxy** — see [WORKER.md](WORKER.md)
+- Try it triggers a real Pages deploy through a **rate-limited proxy** — see [WORKER.md](WORKER.md)
 
 ## 🔄 Forking This Repository
 
