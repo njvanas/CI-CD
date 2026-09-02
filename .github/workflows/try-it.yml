@@ -51,7 +51,7 @@ jobs:
     needs: gate
     if: needs.gate.outputs.allowed == 'true'
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     secrets: inherit

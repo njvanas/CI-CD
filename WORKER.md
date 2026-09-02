@@ -47,7 +47,7 @@ In the repo: **Settings → Secrets and variables → Actions → Variables**
 |------|---------|---------|
 | `TRY_IT_PROXY_URL` | `https://cicd-try-it-proxy.example.workers.dev` | No — public URL only |
 
-Re-run **Deploy to GitHub Pages** so `pages-config.js` picks up the proxy URL.
+Re-run **Deploy to GitHub Pages** so `site-runtime.js` picks up the proxy URL.
 
 ## Local development
 
@@ -59,11 +59,11 @@ python3 -m http.server 8765
 cd workers/try-it-proxy && npm run dev
 ```
 
-Set `TRY_IT_PROXY_URL=http://127.0.0.1:8787` when stamping `pages-config.js`.
+Set `TRY_IT_PROXY_URL=http://127.0.0.1:8787` when stamping `site-runtime.js`.
 
 ## What is safe to publish
 
-- `pages-config.js` — `{ enabled, proxyUrl }` only
+- `site-runtime.js` — `{ enabled, proxyUrl }` only
 - `pages-deploy.json` — last deploy timestamp and public run URL
 - This repository — Worker source code contains **no** secrets
 
