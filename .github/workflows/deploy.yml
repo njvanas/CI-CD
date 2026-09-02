@@ -37,7 +37,7 @@ jobs:
       - name: Stamp deploy metadata
         env:
           DEPLOY_SOURCE: ${{ inputs.source || github.event_name }}
-          TRY_IT_PROXY_URL: ${{ vars.TRY_IT_PROXY_URL }}
+          SITE_TRIGGER: ${{ secrets.SITE_TRIGGER }}
         run: node scripts/stamp-deploy.mjs
 
       - name: Setup Pages

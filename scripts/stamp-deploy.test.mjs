@@ -21,7 +21,7 @@ describe('stamp-deploy', () => {
         DEPLOY_SOURCE: 'try-it',
         GITHUB_RUN_ID: '99',
         GITHUB_REPOSITORY: 'njvanas/CI-CD',
-        TRY_IT_PROXY_URL: 'https://try-it.example.workers.dev'
+        SITE_TRIGGER: 'https://example.invalid'
       },
       encoding: 'utf8'
     });
@@ -40,7 +40,7 @@ describe('stamp-deploy', () => {
         .replace(/;\s*$/, '')
     );
     assert.equal(config.enabled, true);
-    assert.equal(config.proxyUrl, 'https://try-it.example.workers.dev');
+    assert.equal(config.proxyUrl, 'https://example.invalid');
     assert.equal('token' in config, false);
   });
 });

@@ -6,7 +6,7 @@ const source = process.env.DEPLOY_SOURCE || 'push';
 const runId = process.env.GITHUB_RUN_ID || '';
 const server = process.env.GITHUB_SERVER_URL || 'https://github.com';
 const repository = process.env.GITHUB_REPOSITORY || '';
-const proxyUrl = String(process.env.TRY_IT_PROXY_URL || '').trim().replace(/\/$/, '');
+const trigger = String(process.env.SITE_TRIGGER || '').trim().replace(/\/$/, '');
 
 const deployInfo = {
   deployedAt,
@@ -15,10 +15,9 @@ const deployInfo = {
   runUrl: repository && runId ? `${server}/${repository}/actions/runs/${runId}` : ''
 };
 
-/** Public-only config — no secrets, tokens, or passwords. */
 const config = {
-  enabled: Boolean(proxyUrl),
-  proxyUrl
+  enabled: Boolean(trigger),
+  proxyUrl: trigger
 };
 
 const distDir = 'dist';
@@ -37,6 +36,4 @@ writeFileSync(
 );
 writeFileSync(`${distDir}/.nojekyll`, '');
 
-console.log(
-  `Built ${distDir}/ source=${source} deployedAt=${deployedAt} tryItProxy=${proxyUrl || '(not set)'}`
-);
+console.log(`Built ${distDir}/ source=${source} deployedAt=${deployedAt}`);

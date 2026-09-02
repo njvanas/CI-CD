@@ -41,12 +41,6 @@ After forking, you can customize:
 
 Every time you push changes, GitHub Actions will automatically deploy the updated site.
 
-## 🧪 Enable the Try it button
-
-1. Deploy the Worker (`workers/try-it-proxy`) — see **[WORKER.md](WORKER.md)**
-2. Set Actions variable `TRY_IT_PROXY_URL` to your Worker URL
-3. Re-run the Pages deploy workflow
-
 ## 🔧 Troubleshooting
 
 ### Workflow Fails with "Pages site failed" Error

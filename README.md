@@ -5,9 +5,7 @@ A modern website template with automated CI/CD deployment to GitHub Pages using 
 ## 🚀 Features
 
 - **Automated Deployment**: Every push to `main`/`master` automatically deploys to GitHub Pages
-- **Try it button**: Visitors can trigger a real GitHub Pages redeploy from the live site
-- **Deploy timestamp**: The header shows the date and time of the last Pages publish
-- **Rate limits**: Same IP can use Try it once every 5 minutes, up to 5 times per UTC day
+- **Try it button**: Redeploys the live site and updates the header date
 - **Modern UI**: Clean, responsive design with smooth animations
 - **Fork-Ready**: Automatically detects your repository and works with any GitHub username
 
@@ -96,10 +94,6 @@ https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
 
 The workflow file (`.github/workflows/deploy.yml`) handles everything automatically.
 
-## 🧪 Try it
-
-Click **Try it** to redeploy the site through GitHub Actions. The header date updates when the new deploy is live. The GitHub token never ships with the page — see **[WORKER.md](WORKER.md)**.
-
 ## 📁 Project Structure
 
 ```
@@ -107,17 +101,13 @@ Click **Try it** to redeploy the site through GitHub Actions. The header date up
 ├── index.html          # Main HTML file
 ├── styles.css          # Stylesheet
 ├── script.js           # JavaScript functionality
-├── scripts/            # Deploy stamp and rate-limit gate
-├── workers/
-│   └── try-it-proxy/   # Holds the GitHub token (see WORKER.md)
+├── scripts/            # Deploy stamp
 ├── .github/
 │   └── workflows/
 │       ├── deploy.yml  # CI/CD workflow (works automatically!)
-│       ├── try-it.yml  # Rate-limited deploy triggered by Try it
-│       └── test.yml    # Unit tests for rate-limit rules
+│       └── test.yml    # Unit tests
 ├── .gitignore          # Git ignore rules
 ├── README.md           # This file
-├── WORKER.md           # Secure Try it proxy setup
 └── SETUP.md            # Detailed setup guide for forking
 ```
 
@@ -135,7 +125,6 @@ Click **Try it** to redeploy the site through GitHub Actions. The header date up
 - GitHub Pages is free for public repositories
 - Deployment typically takes 1-2 minutes after push
 - You can manually trigger deployment via Actions tab → "Deploy to GitHub Pages" → "Run workflow"
-- Try it redeploys Pages and updates the header date — see [WORKER.md](WORKER.md)
 
 ## 🔄 Forking This Repository
 
