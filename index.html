@@ -44,7 +44,6 @@
                     <button type="button" id="try-it-btn" class="btn btn--primary">Try it</button>
                     <a class="btn btn--outline" href="#cicd">View pipeline</a>
                 </div>
-                <p id="message" class="hidden" role="status" aria-live="polite"></p>
             </div>
         </section>
 
@@ -240,27 +239,6 @@
                 <div class="modal-result">
                     <strong>Result:</strong> <span id="modal-result"></span>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="try-it-auth-modal" class="modal" aria-hidden="true" aria-labelledby="try-it-auth-title">
-        <div class="modal-content modal-content--auth">
-            <span class="modal-close" id="try-it-auth-close" aria-label="Close">&times;</span>
-            <div class="modal-header">
-                <div class="modal-icon" aria-hidden="true">🔐</div>
-                <h2 id="try-it-auth-title">Try it</h2>
-            </div>
-            <div class="modal-body">
-                <form id="try-it-auth-form" class="try-it-auth-form">
-                    <label class="try-it-auth-form__label" for="try-it-password">Password</label>
-                    <input class="try-it-auth-form__input" type="password" id="try-it-password" name="password" autocomplete="current-password" required />
-                    <p id="try-it-auth-error" class="try-it-auth-form__error hidden" role="alert"></p>
-                    <div class="try-it-auth-form__actions">
-                        <button type="button" class="btn btn--outline" id="try-it-auth-cancel">Cancel</button>
-                        <button type="submit" class="btn btn--primary">Continue</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
