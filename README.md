@@ -27,6 +27,7 @@ A modern website template with automated CI/CD deployment to GitHub Pages using 
 5. Click **Save**
 6. Push any change (or wait for the workflow to run automatically)
 7. Your site will be live at: `https://YOUR_USERNAME.github.io/TEMP-CI-CD/`
+8. Protect `main`/`master` from force-push and deletion — see [Protect the default branch](SETUP.md#protect-the-default-branch)
 
 ## 🛠️ Setup Instructions (Manual Method)
 
@@ -124,10 +125,12 @@ Limits: **5 minutes between deploys** and **5 per IP per UTC day** (enforced at 
 ├── index.html          # Main HTML file
 ├── styles.css          # Stylesheet
 ├── script.js           # JavaScript functionality
-├── scripts/            # Deploy stamp, rate-limit gate
+├── scripts/            # Deploy stamp, rate-limit gate, branch-protection helper
 ├── workers/
 │   └── try-it-proxy/   # Rate-limited Cloudflare Worker (see WORKER.md)
 ├── .github/
+│   ├── rulesets/
+│   │   └── protect-default-branch.json  # Import to block force-push/deletion
 │   └── workflows/
 │       ├── deploy.yml  # CI/CD workflow (works automatically!)
 │       ├── try-it.yml  # Rate-limited deploy triggered by Try it
@@ -153,6 +156,7 @@ Limits: **5 minutes between deploys** and **5 per IP per UTC day** (enforced at 
 - Deployment typically takes 1-2 minutes after push
 - You can manually trigger deployment via Actions tab → "Deploy to GitHub Pages" → "Run workflow"
 - Try it triggers a real Pages deploy through a **rate-limited proxy** — see [WORKER.md](WORKER.md)
+- GitHub may show **Your master branch isn't protected**. That setting lives in the repository, not in git. Follow [Protect the default branch](SETUP.md#protect-the-default-branch) — it blocks force-push and deletion without requiring pull requests, so push-to-deploy still works.
 
 ## 🔄 Forking This Repository
 
@@ -167,6 +171,7 @@ This repository is designed to work automatically when forked:
 - [GitHub Pages Documentation](https://docs.github.com/en/pages)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [How to Fork a Repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
+- [Managing a branch protection rule](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule)
 
 ## 📄 License
 

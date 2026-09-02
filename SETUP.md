@@ -2,7 +2,7 @@
 
 This repository is designed to work automatically when forked to your own GitHub account. Follow these simple steps:
 
-## 🚀 Quick Setup (3 Steps)
+## 🚀 Quick Setup (4 Steps)
 
 ### Step 1: Fork the Repository
 1. Click the **Fork** button at the top right of this repository
@@ -23,6 +23,42 @@ This repository is designed to work automatically when forked to your own GitHub
    ```
    https://YOUR_USERNAME.github.io/TEMP-CI-CD/
    ```
+
+### Step 4: Protect the default branch
+See [Protect the default branch](#protect-the-default-branch) so GitHub stops warning that `master`/`main` can be force-pushed or deleted.
+
+## 🔒 Protect the default branch
+
+GitHub shows **Your master branch isn't protected** until the default branch blocks force-pushes and deletion. That is a repository admin setting — a commit cannot turn it on.
+
+For this repository, open [Settings → Branches](https://github.com/njvanas/CI-CD/settings/branches).
+
+Do **not** enable "Require a pull request before merging". This project deploys on every push to `main`/`master`.
+
+### Option 1: GitHub UI (clears the banner)
+
+1. Open **Settings → Branches**: `https://github.com/YOUR_USERNAME/YOUR_REPO/settings/branches`
+2. Click **Add classic branch protection rule**
+3. Branch name pattern: `master` (or `main` if that is your default branch)
+4. Leave the extra checkboxes off (no required reviews or status checks)
+5. Click **Create**
+
+Force-pushes and deleting the branch are blocked by default.
+
+### Option 2: GitHub CLI (repository admin)
+
+```bash
+./scripts/protect-default-branch.sh
+```
+
+### Option 3: Import a ruleset
+
+1. Open **Settings → Rules → Rulesets**
+2. **New ruleset** → **Import a ruleset**
+3. Choose [`.github/rulesets/protect-default-branch.json`](.github/rulesets/protect-default-branch.json)
+4. Review and click **Create**
+
+Optional later: on the same protection rule, enable **Require status checks to pass before merging** and select the `unit` check from the Tests workflow. That only affects pull request merges, not direct pushes.
 
 ## ✨ What Happens Automatically
 
