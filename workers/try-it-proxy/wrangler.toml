@@ -2,11 +2,10 @@ name = "cicd-try-it-proxy"
 main = "src/index.js"
 compatibility_date = "2024-12-01"
 
-# Local wrangler uses simulated KV. Replace id with the real namespace
-# from `npx wrangler kv namespace create RATE_LIMITS` before deploy.
+# preview_id is used by `wrangler dev`. Production id is the RATE_LIMITS namespace.
 [[kv_namespaces]]
 binding = "RATE_LIMITS"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "f3d739150509428780e2f9145f4ae03b"
 preview_id = "local-rate-limits-preview"
 
 [dev]
